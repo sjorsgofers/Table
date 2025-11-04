@@ -151,8 +151,7 @@
 </header>
 <main>
   <div class="toolbar">
-    <button class="btn" id="resetBeneden">Reset Beneden</button>
-    <button class="btn" id="resetBoven">Reset Boven</button>
+    <!-- ✅ Nog maar één knop -->
     <button class="btn" id="resetAll">Reset alles</button>
     <button id="helpBtn" class="help-btn">HELP</button>
   </div>
@@ -221,12 +220,10 @@
 <!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ====== Supabase ====== */
 const SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-/* ====== Ranges ====== */
 const RANGES_BENEDEN = [[1,13]];
 const RANGES_BOVEN   = [[20,58]];
 const DISPLAY_GROUPS = [
@@ -241,12 +238,10 @@ function zoneFor(n){
   return 'bt';
 }
 
-/* ====== Elements ====== */
 const gridEl=document.getElementById('grid');
 const overlay=document.getElementById('overlay');
 const cancelBtn=document.getElementById('cancelModal');
 const openNoteBtn=document.getElementById('openNote');
-
 const statusChoices=document.getElementById('statusChoices');
 const noteEditor=document.getElementById('noteEditor');
 const noteInput=document.getElementById('noteInput');
@@ -255,8 +250,6 @@ const deleteNoteBtn=document.getElementById('deleteNote');
 const cancelNoteBtn=document.getElementById('cancelNote');
 const choiceBtns=overlay.querySelectorAll('.choice');
 
-const resetBenedenBtn=document.getElementById('resetBeneden');
-const resetBovenBtn=document.getElementById('resetBoven');
 const resetAllBtn=document.getElementById('resetAll');
 
 const helpBtn=document.getElementById('helpBtn');
@@ -266,7 +259,6 @@ const helpCancel=document.getElementById('helpCancel');
 const alertScreen=document.getElementById('alertScreen');
 const alertSub=document.getElementById('alertSub');
 
-/* ====== State ====== */
 const STATUS_CLASSES={ nieuw:"status-nieuw", drank:"status-drank", run:"status-run", koffie:"status-koffie", rekening:"status-rekening" };
 let rows = new Map();
 let timerInterval=null;
@@ -276,7 +268,6 @@ let helpChannel=null;
 let lastRealtimeAt=0;
 let alertTimeout=null;
 
-/* ====== Helpers ====== */
 function keyOf(zone, n){ return `${zone}-${n}`; }
 function applyStatusClass(cell,status){
   cell.classList.remove(...Object.values(STATUS_CLASSES));
@@ -301,7 +292,6 @@ function fmtElapsed(ms){
   return h?`${h}:${pad(m)}:${pad(s)}`:`${m}:${pad(s)}`;
 }
 
-/* ====== Data IO ====== */
 async function fetchAll(){
   const { data, error } = await sb.from('tables_status').select('*');
   if(error){ console.error('fetchAll error', error); return; }
@@ -317,7 +307,6 @@ async function upsertByNumber(n, patch){
   return data;
 }
 
-/* ====== Render ====== */
 function render(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   gridEl.innerHTML='';
@@ -382,11 +371,9 @@ function render(){
   timerInterval = setInterval(tick, 1000);
 }
 
-/* ====== Modal panes ====== */
 function showChoicesPane(){ statusChoices.style.display='grid'; noteEditor.classList.remove('open'); }
 function showNotePane(){ statusChoices.style.display='none'; noteEditor.classList.add('open'); }
 
-/* ====== Status + Reset ====== */
 choiceBtns.forEach(btn=>{
   btn.addEventListener('click', async ()=>{
     if(!pendingTableEl) return;
@@ -409,7 +396,6 @@ choiceBtns.forEach(btn=>{
   });
 });
 
-/* ====== Notities ====== */
 openNoteBtn.addEventListener('click',()=>{ if(pendingTableEl) showNotePane(); });
 saveNoteBtn.addEventListener('click', async ()=>{
   if(!pendingTableEl) return;
@@ -428,39 +414,24 @@ deleteNoteBtn.addEventListener('click', async ()=>{
 });
 cancelNoteBtn.addEventListener('click',()=>{ showChoicesPane(); });
 
-/* ====== Overlay controls ====== */
 cancelBtn.addEventListener('click',()=>{ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); });
 overlay.addEventListener('click',e=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); }});
 
-/* ====== Resets (handmatig: alleen status/timer) ====== */
-function expand(r){ const out=[]; for(const [a,b] of r){ for(let i=a;i<=b;i++) out.push(i);} return out; }
-async function resetRange(ranges){
-  const nums = expand(ranges);
-  for(const n of nums){
-    const z = zoneFor(n);
-    const r = rows.get(keyOf(z,n));
-    if(!r) continue;
-    await upsertByNumber(n, { status:null, status_started:null });
-  }
-  render();
-}
-resetBenedenBtn.addEventListener('click', ()=>resetRange(RANGES_BENEDEN));
-resetBovenBtn.addEventListener('click',    ()=>resetRange(RANGES_BOVEN));
-resetAllBtn.addEventListener('click', async ()=>{ await resetRange([...RANGES_BENEDEN, ...RANGES_BOVEN]); });
-
-/* ====== ✅ Auto reset om 02:00: alles leeg, ook rode cijfers ====== */
-async function fullAutoReset(){
+/* ✅ Eén handmatige resetknop die alles reset (status, timer, num_marked, notities blijven) */
+async function fullResetAll(){
   const allRanges = [...RANGES_BENEDEN, ...RANGES_BOVEN];
-  const nums = expand(allRanges);
+  const nums = expandRanges(allRanges);
   for(const n of nums){
     const z = zoneFor(n);
     const r = rows.get(keyOf(z,n));
     if(!r) continue;
-    // status weg, timer weg, num_marked weg, notitie laten staan
     await upsertByNumber(n, { status:null, status_started:null, num_marked:false });
   }
   render();
 }
+resetAllBtn.addEventListener('click', fullResetAll);
+
+/* ✅ Auto reset om 02:00 (zelfde als knop) */
 async function autoDailyResetCheck(){
   const now = new Date();
   const hh = now.getHours();
@@ -468,13 +439,12 @@ async function autoDailyResetCheck(){
   const todayKey = now.toISOString().slice(0,10);
   const last = localStorage.getItem('last_auto_reset');
   if(hh === 2 && mm < 5 && last !== todayKey){
-    await fullAutoReset();
+    await fullResetAll();
     localStorage.setItem('last_auto_reset', todayKey);
   }
 }
 setInterval(autoDailyResetCheck, 60_000);
 
-/* ====== Realtime tafels ====== */
 function subscribeRealtimeTables(){
   if(tableChannel){ sb.removeChannel(tableChannel); }
   tableChannel = sb.channel('tables_status:all');
@@ -506,7 +476,6 @@ setInterval(async ()=>{
   }
 }, 6000);
 
-/* ====== HELP: events ====== */
 function showAlert(kind){
   if(alertTimeout){ clearTimeout(alertTimeout); alertTimeout=null; }
   alertSub.textContent = kind;
@@ -534,7 +503,6 @@ setInterval(async ()=>{
   if(!error && data && data[0]) showAlert(data[0].kind);
 }, 5000);
 
-/* HELP UI */
 helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
 helpOverlay.addEventListener('click', e=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
 helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
@@ -547,7 +515,6 @@ helpOpts.forEach(btn=>{
   });
 });
 
-/* ====== Init ====== */
 (async function(){
   await fetchAll();
   render();
