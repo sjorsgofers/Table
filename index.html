@@ -132,16 +132,23 @@
   .help-grid{padding:14px; display:grid; gap:10px}
   .help-opt{padding:14px; font-weight:800; border:2px solid #ef4444; color:#ef4444; background:#fff; border-radius:12px; cursor:pointer; text-align:center}
 
+  /* ✅ Nieuwe zachte assistentie-overlay */
   .alert-screen{
-    position:fixed; inset:0; background:#ef4444; color:#fff; display:none; align-items:center; justify-content:center; flex-direction:column;
+    position:fixed; inset:0; background:#ffffff; color:#000;
+    display:none; align-items:center; justify-content:center; flex-direction:column;
     z-index:2147483647; text-align:center; padding:24px;
   }
   .alert-screen.show{display:flex;}
-  .alert-title{font-size:16vw; line-height:0.9; font-weight:1000; letter-spacing:2px;}
-  .alert-sub{font-size:8vw; font-weight:800; margin-top:12px;}
-  @media (min-width: 768px){
-    .alert-title{font-size:160px}
-    .alert-sub{font-size:72px}
+  .alert-title{
+    font-size:clamp(32px, 10vw, 72px);
+    line-height:1;
+    font-weight:1000;
+    letter-spacing:1px;
+  }
+  .alert-sub{
+    font-size:clamp(20px, 6vw, 40px);
+    font-weight:700;
+    margin-top:14px;
   }
 </style>
 </head>
@@ -151,7 +158,6 @@
 </header>
 <main>
   <div class="toolbar">
-    <!-- ✅ Nog maar één knop -->
     <button class="btn" id="resetAll">Reset alles</button>
     <button id="helpBtn" class="help-btn">HELP</button>
   </div>
@@ -211,9 +217,9 @@
   </div>
 </div>
 
-<!-- ALERT Screen -->
+<!-- ✅ Nieuwe zachte assistentie overlay -->
 <div id="alertScreen" class="alert-screen" aria-live="assertive" aria-atomic="true">
-  <div class="alert-title">ALERT</div>
+  <div class="alert-title">Assistentie gevraagd</div>
   <div id="alertSub" class="alert-sub"></div>
 </div>
 
@@ -417,7 +423,7 @@ cancelNoteBtn.addEventListener('click',()=>{ showChoicesPane(); });
 cancelBtn.addEventListener('click',()=>{ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); });
 overlay.addEventListener('click',e=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); }});
 
-/* ✅ Eén handmatige resetknop die alles reset (status, timer, num_marked, notities blijven) */
+/* ✅ Eén resetknop die alles leegt behalve notities */
 async function fullResetAll(){
   const allRanges = [...RANGES_BENEDEN, ...RANGES_BOVEN];
   const nums = expandRanges(allRanges);
@@ -444,6 +450,38 @@ async function autoDailyResetCheck(){
   }
 }
 setInterval(autoDailyResetCheck, 60_000);
+
+/* ====== HELP realtime ====== */
+function showAlert(kind){
+  // zachte versie
+  alertSub.textContent = kind;
+  alertScreen.classList.add('show');
+
+  // sluit op klik / tik
+  const close = ()=>{
+    alertScreen.classList.remove('show');
+    alertScreen.removeEventListener('click', close);
+  };
+  alertScreen.addEventListener('click', close);
+
+  // sluit na 6s
+  setTimeout(close, 6000);
+}
+async function sendHelp(kind){
+  const { error } = await sb.from('help_events').insert({ kind });
+  if(error){ console.error('help insert error', error); }
+}
+function subscribeRealtimeHelp(){
+  if(helpChannel){ sb.removeChannel(helpChannel); }
+  helpChannel = sb.channel('help_events:all');
+  helpChannel.on('postgres_changes',
+    { event:'INSERT', schema:'public', table:'help_events' },
+    payload=>{
+      const row = payload.new;
+      if(row && row.kind){ showAlert(row.kind); }
+    }
+  ).subscribe();
+}
 
 function subscribeRealtimeTables(){
   if(tableChannel){ sb.removeChannel(tableChannel); }
@@ -476,33 +514,7 @@ setInterval(async ()=>{
   }
 }, 6000);
 
-function showAlert(kind){
-  if(alertTimeout){ clearTimeout(alertTimeout); alertTimeout=null; }
-  alertSub.textContent = kind;
-  alertScreen.classList.add('show');
-  alertTimeout = setTimeout(()=> alertScreen.classList.remove('show'), 6000);
-}
-async function sendHelp(kind){
-  const { error } = await sb.from('help_events').insert({ kind });
-  if(error){ console.error('help insert error', error); }
-}
-function subscribeRealtimeHelp(){
-  if(helpChannel){ sb.removeChannel(helpChannel); }
-  helpChannel = sb.channel('help_events:all');
-  helpChannel.on('postgres_changes',
-    { event:'INSERT', schema:'public', table:'help_events' },
-    payload=>{
-      const row = payload.new;
-      if(row && row.kind){ showAlert(row.kind); }
-    }
-  ).subscribe();
-}
-setInterval(async ()=>{
-  const since = new Date(Date.now() - 8000).toISOString();
-  const { data, error } = await sb.from('help_events').select('*').gte('created_at', since).order('created_at', { ascending:false }).limit(1);
-  if(!error && data && data[0]) showAlert(data[0].kind);
-}, 5000);
-
+/* HELP UI */
 helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
 helpOverlay.addEventListener('click', e=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
 helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
@@ -511,7 +523,7 @@ helpOpts.forEach(btn=>{
     const kind = btn.dataset.help;
     helpOverlay.classList.remove('open');
     await sendHelp(kind);
-    showAlert(kind);
+    showAlert(kind); // toon lokaal meteen
   });
 });
 
