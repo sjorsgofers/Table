@@ -41,8 +41,6 @@
   .dot.leeg{background:var(--soft); border:1px solid var(--border)}
 
   .grid{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(86px,1fr));}
-
-  /* ✅ Sectietitels duidelijk en responsief */
   .group-label{
     grid-column:1 / -1;
     background:var(--label);
@@ -57,13 +55,13 @@
 
   .table{
     user-select:none; display:grid; grid-template-rows:auto auto 1fr; gap:6px; place-items:center;
-    padding:10px 10px 28px; /* ✅ extra ruimte onderaan voor timer */
+    padding:10px 10px 28px;
     aspect-ratio:1/1; border-radius:12px;
     background:var(--card); border:1px solid var(--border);
     font-weight:800; font-size:18px; cursor:pointer; position:relative;
   }
   .num{font-size:18px; line-height:1; color:var(--text);}
-  .num.num-flagged{ color: var(--nieuw); } /* blijvende nummerkleur na 'Nieuw' */
+  .num.num-flagged{ color: var(--nieuw); }
 
   .table[data-status]{color:#fff; border-color:transparent;}
   .table[data-status] .num{ color:#fff !important; }
@@ -74,7 +72,6 @@
   .table.status-koffie{ background:var(--koffie);}
   .table.status-rekening{ background:var(--rekening);}
 
-  /* ✅ Timer gecentreerd onderaan, niet door notities heen */
   .timer{
     position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
     font-size:12px; font-weight:700; color:#475569; pointer-events:none;
@@ -87,24 +84,18 @@
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
   }
 
-  /* ✅ Popup volledig ondoorzichtig (geen doorschijn) */
   .overlay{
     position:fixed; inset:0;
-    background:rgba(0,0,0,0.6); /* alleen de achtergrond dimt */
+    background:rgba(0,0,0,0.6);
     display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647;
-    backdrop-filter:none;
   }
   .overlay.open{display:flex;}
   .modal{
     width:100%; max-width:480px;
-    background:#ffffff; /* solide wit */
-    opacity:1; /* expliciet */
+    background:#ffffff;
     border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.35);
     border:1px solid var(--border);
   }
-  /* extra safeguard voor iOS/rare browsers */
-  .modal, .modal *{ -webkit-backdrop-filter:none; backdrop-filter:none; }
-
   .modal-header{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:800; color:#111827; background:#fff}
   .modal-grid{padding:14px; display:grid; gap:10px; grid-template-columns:repeat(2,1fr); background:#fff}
   .choice{
@@ -132,8 +123,8 @@
     font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; resize:vertical; background:#fff; color:#111827;
   }
   .note-actions{margin-top:10px; display:flex; gap:8px; justify-content:flex-end}
+  .danger{border-color:#ef4444; color:#ef4444}
 
-  /* HELP popups en ALERT blijven gelijk */
   .help-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647;}
   .help-overlay.open{display:flex;}
   .help-modal{width:100%; max-width:420px; background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
@@ -235,7 +226,7 @@ const SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-/* ====== Ranges & volgorde (Beneden + Boven) ====== */
+/* ====== Ranges ====== */
 const RANGES_BENEDEN = [[1,13]];
 const RANGES_BOVEN   = [[20,58]];
 const DISPLAY_GROUPS = [
@@ -277,7 +268,7 @@ const alertSub=document.getElementById('alertSub');
 
 /* ====== State ====== */
 const STATUS_CLASSES={ nieuw:"status-nieuw", drank:"status-drank", run:"status-run", koffie:"status-koffie", rekening:"status-rekening" };
-let rows = new Map(); // key `${zone}-${n}` -> row
+let rows = new Map();
 let timerInterval=null;
 let pendingTableEl=null;
 let tableChannel=null;
@@ -326,7 +317,7 @@ async function upsertByNumber(n, patch){
   return data;
 }
 
-/* ====== Render (met sectietitels) ====== */
+/* ====== Render ====== */
 function render(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   gridEl.innerHTML='';
@@ -399,7 +390,7 @@ function showNotePane(){ statusChoices.style.display='none'; noteEditor.classLis
 choiceBtns.forEach(btn=>{
   btn.addEventListener('click', async ()=>{
     if(!pendingTableEl) return;
-    const choice = btn.dataset.choice;  // nieuw | drank | run | koffie | rekening | reset
+    const choice = btn.dataset.choice;
     const n = Number(pendingTableEl.dataset.num);
 
     if(choice === 'reset'){
@@ -410,7 +401,7 @@ choiceBtns.forEach(btn=>{
     }
 
     const patch = { status:choice, status_started:new Date().toISOString() };
-    if(choice === 'nieuw'){ patch.num_marked = true; } // blijvende nummerkleur
+    if(choice === 'nieuw'){ patch.num_marked = true; }
     await upsertByNumber(n, patch);
     applyStatusClass(pendingTableEl, choice);
     if(choice === 'nieuw'){ setNumFlag(pendingTableEl, true); }
@@ -441,7 +432,7 @@ cancelNoteBtn.addEventListener('click',()=>{ showChoicesPane(); });
 cancelBtn.addEventListener('click',()=>{ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); });
 overlay.addEventListener('click',e=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); }});
 
-/* ====== Resets ====== */
+/* ====== Resets (handmatig: alleen status/timer) ====== */
 function expand(r){ const out=[]; for(const [a,b] of r){ for(let i=a;i<=b;i++) out.push(i);} return out; }
 async function resetRange(ranges){
   const nums = expand(ranges);
@@ -457,6 +448,32 @@ resetBenedenBtn.addEventListener('click', ()=>resetRange(RANGES_BENEDEN));
 resetBovenBtn.addEventListener('click',    ()=>resetRange(RANGES_BOVEN));
 resetAllBtn.addEventListener('click', async ()=>{ await resetRange([...RANGES_BENEDEN, ...RANGES_BOVEN]); });
 
+/* ====== ✅ Auto reset om 02:00: alles leeg, ook rode cijfers ====== */
+async function fullAutoReset(){
+  const allRanges = [...RANGES_BENEDEN, ...RANGES_BOVEN];
+  const nums = expand(allRanges);
+  for(const n of nums){
+    const z = zoneFor(n);
+    const r = rows.get(keyOf(z,n));
+    if(!r) continue;
+    // status weg, timer weg, num_marked weg, notitie laten staan
+    await upsertByNumber(n, { status:null, status_started:null, num_marked:false });
+  }
+  render();
+}
+async function autoDailyResetCheck(){
+  const now = new Date();
+  const hh = now.getHours();
+  const mm = now.getMinutes();
+  const todayKey = now.toISOString().slice(0,10);
+  const last = localStorage.getItem('last_auto_reset');
+  if(hh === 2 && mm < 5 && last !== todayKey){
+    await fullAutoReset();
+    localStorage.setItem('last_auto_reset', todayKey);
+  }
+}
+setInterval(autoDailyResetCheck, 60_000);
+
 /* ====== Realtime tafels ====== */
 function subscribeRealtimeTables(){
   if(tableChannel){ sb.removeChannel(tableChannel); }
@@ -467,10 +484,8 @@ function subscribeRealtimeTables(){
       const row = payload.new || payload.old;
       if(!row) return;
       if(!ALL_NUMBERS.includes(row.table_num)) return;
-
       lastRealtimeAt = Date.now();
       rows.set(keyOf(row.zone, row.table_num), payload.new || row);
-
       const cell = gridEl.querySelector(`.table[data-num="${row.table_num}"]`);
       if(cell){
         const r = rows.get(keyOf(row.zone, row.table_num));
@@ -513,12 +528,11 @@ function subscribeRealtimeHelp(){
     }
   ).subscribe();
 }
-async function pollHelp(){
+setInterval(async ()=>{
   const since = new Date(Date.now() - 8000).toISOString();
   const { data, error } = await sb.from('help_events').select('*').gte('created_at', since).order('created_at', { ascending:false }).limit(1);
   if(!error && data && data[0]) showAlert(data[0].kind);
-}
-setInterval(pollHelp, 5000);
+}, 5000);
 
 /* HELP UI */
 helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
@@ -526,7 +540,7 @@ helpOverlay.addEventListener('click', e=>{ if(e.target===helpOverlay) helpOverla
 helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
 helpOpts.forEach(btn=>{
   btn.addEventListener('click', async ()=>{
-    const kind = btn.dataset.help; // "Bar Beneden" | "Bar Boven" | "Run"
+    const kind = btn.dataset.help;
     helpOverlay.classList.remove('open');
     await sendHelp(kind);
     showAlert(kind);
@@ -539,6 +553,7 @@ helpOpts.forEach(btn=>{
   render();
   subscribeRealtimeTables();
   subscribeRealtimeHelp();
+  autoDailyResetCheck();
 })();
 </script>
 </body>
