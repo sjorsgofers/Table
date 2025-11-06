@@ -11,27 +11,71 @@
     --soft:#f1f5f9; --border:#e5e7eb; --label:#e5e7eb;
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
+  html,body{
+    height:100%;
+  }
   body{
-    margin:0; background:var(--bg); color:#111827;
+    margin:0;
+    background:var(--bg);
+    color:#111827;
     font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    display:grid; grid-template-rows:auto 1fr;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
   }
   header{
-    background:var(--card); border-bottom:1px solid var(--border);
-    position:sticky; top:0; z-index:10; padding:14px 16px; display:flex; align-items:center; gap:12px;
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    padding:10px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex:0 0 auto;
   }
-  .title{font-weight:800; flex:1}
-  main{padding:14px}
-
-  .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .title{
+    font-weight:800;
+    flex:1;
+    font-size:clamp(16px, 3vw, 20px);
+  }
+  main{
+    flex:1 1 auto;
+    min-height:0; /* belangrijk voor scrollende children */
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:10px 14px 14px;
+  }
+  .toolbar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
   .btn, .help-btn{
-    appearance:none; border:1px solid var(--border); background:#fff; color:#111827;
-    padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600;
+    appearance:none;
+    border:1px solid var(--border);
+    background:#fff;
+    color:#111827;
+    padding:7px 11px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:clamp(12px, 2.4vw, 14px);
   }
-  .help-btn{ border:2px solid var(--nieuw); color:var(--nieuw); font-weight:900; letter-spacing:1px; }
-
-  .legend{display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-size:14px; color:#6b7280}
+  .help-btn{
+    border:2px solid var(--nieuw);
+    color:var(--nieuw);
+    font-weight:900;
+    letter-spacing:1px;
+  }
+  .legend{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+    font-size:clamp(11px, 2.5vw, 14px);
+    color:#6b7280;
+  }
   .dot{width:12px; height:12px; border-radius:3px; display:inline-block; margin-right:6px}
   .dot.nieuw{background:var(--nieuw)}
   .dot.drank{background:var(--drank)}
@@ -40,27 +84,56 @@
   .dot.rekening{background:var(--rekening)}
   .dot.leeg{background:var(--soft); border:1px solid var(--border)}
 
-  .grid{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(86px,1fr));}
+  /* container voor raster moet kunnen scrollen als het niet past */
+  .grid-wrapper{
+    flex:1 1 auto;
+    min-height:0;
+    overflow:auto;
+  }
+
+  /* responsive raster: kleinere min-tiles op kleine schermen */
+  .grid{
+    display:grid;
+    gap:10px;
+    grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
+  }
+
+  @media (min-width: 600px){
+    .grid{
+      grid-template-columns:repeat(auto-fit,minmax(86px,1fr));
+    }
+  }
+
   .group-label{
     grid-column:1 / -1;
     background:var(--label);
     border:1px solid var(--border);
     border-radius:10px;
-    padding:8px 12px;
+    padding:7px 10px;
     font-weight:900;
     letter-spacing:.3px;
-    font-size:clamp(14px, 2.2vw, 18px);
+    font-size:clamp(13px, 2.2vw, 16px);
     color:#111827;
   }
 
   .table{
-    user-select:none; display:grid; grid-template-rows:auto auto 1fr; gap:6px; place-items:center;
-    padding:10px 10px 28px;
-    aspect-ratio:1/1; border-radius:12px;
-    background:var(--card); border:1px solid var(--border);
-    font-weight:800; font-size:18px; cursor:pointer; position:relative;
+    user-select:none;
+    display:grid;
+    grid-template-rows:auto auto 1fr;
+    gap:5px;
+    place-items:center;
+    padding:8px 8px 26px;
+    aspect-ratio:1/1;
+    border-radius:12px;
+    background:var(--card);
+    border:1px solid var(--border);
+    font-weight:800;
+    font-size:clamp(14px, 3vw, 18px);
+    cursor:pointer;
+    position:relative;
+    min-height:74px;
   }
-  .num{font-size:18px; line-height:1; color:var(--text);}
+  .num{line-height:1; color:var(--text);}
   .num.num-flagged{ color: var(--nieuw); }
 
   .table[data-status]{color:#fff; border-color:transparent;}
@@ -73,15 +146,30 @@
   .table.status-rekening{ background:var(--rekening);}
 
   .timer{
-    position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
-    font-size:12px; font-weight:700; color:#475569; pointer-events:none;
+    position:absolute;
+    bottom:5px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:clamp(10px, 2.4vw, 12px);
+    font-weight:700;
+    color:#475569;
+    pointer-events:none;
   }
   .table[data-status] .timer{ color:#fff; }
 
   .note{
-    font-size:12px; font-weight:600; color:#111827; text-align:center;
-    line-height:1.2; max-width:100%; max-height:2.4em; overflow:hidden; text-overflow:ellipsis;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    font-size:clamp(10px, 2.5vw, 12px);
+    font-weight:600;
+    color:#111827;
+    text-align:center;
+    line-height:1.2;
+    max-width:100%;
+    max-height:2.4em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
   }
 
   .overlay{
@@ -97,10 +185,10 @@
     border:1px solid var(--border);
   }
   .modal-header{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:800; color:#111827; background:#fff}
-  .modal-grid{padding:14px; display:grid; gap:10px; grid-template-columns:repeat(2,1fr); background:#fff}
+  .modal-grid{padding:14px; display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); background:#fff}
   .choice{
     display:flex; align-items:center; gap:10px;
-    border-radius:10px; padding:12px; cursor:pointer;
+    border-radius:10px; padding:10px; cursor:pointer;
     border:1px solid var(--border); background:#fff; font-weight:700; justify-content:center; color:#111827;
   }
   .choice .swatch{width:16px; height:16px; border-radius:4px}
@@ -110,9 +198,10 @@
   .swatch.koffie{background:var(--koffie)}
   .swatch.rekening{background:var(--rekening)}
   .choice.reset{border-color:#9ca3af; color:#374151}
-
-  .modal-footer{padding:12px 14px; border-top:1px solid var(--border);
-    display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff}
+  .modal-footer{
+    padding:12px 14px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center; gap:10px; background:#fff
+  }
   .link{background:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700; color:#111827}
   .link.primary{color:#fff; background:#2563eb; border-color:#2563eb}
 
@@ -132,7 +221,6 @@
   .help-grid{padding:14px; display:grid; gap:10px}
   .help-opt{padding:14px; font-weight:800; border:2px solid #ef4444; color:#ef4444; background:#fff; border-radius:12px; cursor:pointer; text-align:center}
 
-  /* ✅ Nieuwe zachte assistentie-overlay */
   .alert-screen{
     position:fixed; inset:0; background:#ffffff; color:#000;
     display:none; align-items:center; justify-content:center; flex-direction:column;
@@ -140,13 +228,12 @@
   }
   .alert-screen.show{display:flex;}
   .alert-title{
-    font-size:clamp(32px, 10vw, 72px);
+    font-size:clamp(30px, 8vw, 64px);
     line-height:1;
     font-weight:1000;
-    letter-spacing:1px;
   }
   .alert-sub{
-    font-size:clamp(20px, 6vw, 40px);
+    font-size:clamp(18px, 5vw, 36px);
     font-weight:700;
     margin-top:14px;
   }
@@ -171,8 +258,10 @@
     <span><span class="dot rekening"></span>Rekening</span>
   </div>
 
-  <div id="grid" class="grid"></div>
-  <div class="subtle">Klik op lege tafel voor status; klik op gekleurde tafel om te legen. Notities blijven staan.</div>
+  <!-- scrollbare container -->
+  <div class="grid-wrapper">
+    <div id="grid" class="grid"></div>
+  </div>
 </main>
 
 <!-- Status/Notitie Modal -->
@@ -217,7 +306,7 @@
   </div>
 </div>
 
-<!-- ✅ Nieuwe zachte assistentie overlay -->
+<!-- Assistentie overlay -->
 <div id="alertScreen" class="alert-screen" aria-live="assertive" aria-atomic="true">
   <div class="alert-title">Assistentie gevraagd</div>
   <div id="alertSub" class="alert-sub"></div>
@@ -272,9 +361,22 @@ let pendingTableEl=null;
 let tableChannel=null;
 let helpChannel=null;
 let lastRealtimeAt=0;
-let alertTimeout=null;
 
-function keyOf(zone, n){ return `${zone}-${n}`; }
+async function fetchAll(){
+  const { data, error } = await sb.from('tables_status').select('*');
+  if(error){ console.error('fetchAll error', error); return; }
+  rows = new Map(data.map(r=>[`${r.zone}-${r.table_num}`, r]));
+}
+async function upsertByNumber(n, patch){
+  const zone = zoneFor(n);
+  const prev = rows.get(`${zone}-${n}`) || { zone, table_num:n };
+  const payload = { status:null, status_started:null, note:null, num_marked:false, ...prev, ...patch, updated_at:new Date().toISOString() };
+  const { data, error } = await sb.from('tables_status').upsert(payload).select().single();
+  if(error){ console.error('upsert error', error); return prev; }
+  rows.set(`${zone}-${n}`, data);
+  return data;
+}
+
 function applyStatusClass(cell,status){
   cell.classList.remove(...Object.values(STATUS_CLASSES));
   if(status){ cell.classList.add(STATUS_CLASSES[status]); cell.setAttribute('data-status',status); }
@@ -298,21 +400,6 @@ function fmtElapsed(ms){
   return h?`${h}:${pad(m)}:${pad(s)}`:`${m}:${pad(s)}`;
 }
 
-async function fetchAll(){
-  const { data, error } = await sb.from('tables_status').select('*');
-  if(error){ console.error('fetchAll error', error); return; }
-  rows = new Map(data.map(r=>[keyOf(r.zone,r.table_num), r]));
-}
-async function upsertByNumber(n, patch){
-  const zone = zoneFor(n);
-  const prev = rows.get(keyOf(zone,n)) || { zone, table_num:n };
-  const payload = { status:null, status_started:null, note:null, num_marked:false, ...prev, ...patch, updated_at:new Date().toISOString() };
-  const { data, error } = await sb.from('tables_status').upsert(payload).select().single();
-  if(error){ console.error('upsert error', error); return prev; }
-  rows.set(keyOf(zone,n), data);
-  return data;
-}
-
 function render(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   gridEl.innerHTML='';
@@ -326,21 +413,34 @@ function render(){
     const nums = expandRanges(group.ranges);
     for(const n of nums){
       const zone = zoneFor(n);
-      const r = rows.get(keyOf(zone,n)) || {};
+      const r = rows.get(`${zone}-${n}`) || {};
 
       const cell=document.createElement('button');
-      cell.className='table'; cell.type='button'; cell.dataset.num=n;
+      cell.className='table';
+      cell.type='button';
+      cell.dataset.num=n;
 
-      const numEl=document.createElement('div'); numEl.className='num'; numEl.textContent=n; cell.appendChild(numEl);
-      const timerEl=document.createElement('div'); timerEl.className='timer'; timerEl.textContent=''; cell.appendChild(timerEl);
-      const noteEl=document.createElement('div'); noteEl.className='note'; noteEl.textContent=''; cell.appendChild(noteEl);
+      const numEl=document.createElement('div');
+      numEl.className='num';
+      numEl.textContent=n;
+      cell.appendChild(numEl);
+
+      const timerEl=document.createElement('div');
+      timerEl.className='timer';
+      timerEl.textContent='';
+      cell.appendChild(timerEl);
+
+      const noteEl=document.createElement('div');
+      noteEl.className='note';
+      noteEl.textContent='';
+      cell.appendChild(noteEl);
 
       applyStatusClass(cell, r.status || null);
       setNote(cell, r.note || '');
       setNumFlag(cell, !!r.num_marked);
 
       cell.addEventListener('click', async ()=>{
-        const cur = rows.get(keyOf(zone,n)) || {};
+        const cur = rows.get(`${zone}-${n}`) || {};
         const hasStatus = !!cur.status || cell.hasAttribute('data-status');
         if(hasStatus){
           const keepFlag = !!cur.num_marked;
@@ -365,7 +465,7 @@ function render(){
     gridEl.querySelectorAll('.table').forEach(cell=>{
       const n = Number(cell.dataset.num);
       const z = zoneFor(n);
-      const r = rows.get(keyOf(z, n));
+      const r = rows.get(`${z}-${n}`);
       if(r && r.status && r.status_started){
         setTimer(cell, fmtElapsed(now - Date.parse(r.status_started)));
       } else {
@@ -419,17 +519,15 @@ deleteNoteBtn.addEventListener('click', async ()=>{
   overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
 });
 cancelNoteBtn.addEventListener('click',()=>{ showChoicesPane(); });
-
 cancelBtn.addEventListener('click',()=>{ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); });
 overlay.addEventListener('click',e=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); }});
 
-/* ✅ Eén resetknop die alles leegt behalve notities */
 async function fullResetAll(){
   const allRanges = [...RANGES_BENEDEN, ...RANGES_BOVEN];
   const nums = expandRanges(allRanges);
   for(const n of nums){
     const z = zoneFor(n);
-    const r = rows.get(keyOf(z,n));
+    const r = rows.get(`${z}-${n}`);
     if(!r) continue;
     await upsertByNumber(n, { status:null, status_started:null, num_marked:false });
   }
@@ -437,7 +535,6 @@ async function fullResetAll(){
 }
 resetAllBtn.addEventListener('click', fullResetAll);
 
-/* ✅ Auto reset om 02:00 (zelfde als knop) */
 async function autoDailyResetCheck(){
   const now = new Date();
   const hh = now.getHours();
@@ -451,20 +548,15 @@ async function autoDailyResetCheck(){
 }
 setInterval(autoDailyResetCheck, 60_000);
 
-/* ====== HELP realtime ====== */
 function showAlert(kind){
-  // zachte versie
   alertSub.textContent = kind;
   alertScreen.classList.add('show');
 
-  // sluit op klik / tik
   const close = ()=>{
     alertScreen.classList.remove('show');
     alertScreen.removeEventListener('click', close);
   };
   alertScreen.addEventListener('click', close);
-
-  // sluit na 6s
   setTimeout(close, 6000);
 }
 async function sendHelp(kind){
@@ -493,10 +585,10 @@ function subscribeRealtimeTables(){
       if(!row) return;
       if(!ALL_NUMBERS.includes(row.table_num)) return;
       lastRealtimeAt = Date.now();
-      rows.set(keyOf(row.zone, row.table_num), payload.new || row);
+      rows.set(`${row.zone}-${row.table_num}`, payload.new || row);
       const cell = gridEl.querySelector(`.table[data-num="${row.table_num}"]`);
       if(cell){
-        const r = rows.get(keyOf(row.zone, row.table_num));
+        const r = rows.get(`${row.zone}-${row.table_num}`);
         applyStatusClass(cell, r.status || null);
         setNote(cell, r.note || '');
         setNumFlag(cell, !!r.num_marked);
@@ -514,7 +606,6 @@ setInterval(async ()=>{
   }
 }, 6000);
 
-/* HELP UI */
 helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
 helpOverlay.addEventListener('click', e=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
 helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
@@ -523,7 +614,7 @@ helpOpts.forEach(btn=>{
     const kind = btn.dataset.help;
     helpOverlay.classList.remove('open');
     await sendHelp(kind);
-    showAlert(kind); // toon lokaal meteen
+    showAlert(kind);
   });
 });
 
