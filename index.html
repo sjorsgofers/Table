@@ -8,9 +8,9 @@
   :root{
     --bg:#f6f7f9; --card:#fff; --text:#111827; --muted:#6b7280;
     --nieuw:#ef4444; --drank:#f59e0b; --run:#10b981; --koffie:#7c3aed; --rekening:#0ea5e9;
-    --soft:#f1f5f9; --border:#e5e7eb; --label:#eef2f7;
+    --border:#e5e7eb; --label:#eef2f7;
 
-    /* ✅ worden dynamisch gezet in JS */
+    /* dynamisch in JS */
     --gap:10px;
     --tile:86px;
   }
@@ -24,7 +24,7 @@
 
   header{
     background:var(--card); border-bottom:1px solid var(--border);
-    padding:8px 12px; /* iets compacter */
+    padding:8px 12px;
     display:flex; align-items:center; gap:10px;
     flex:0 0 auto;
   }
@@ -42,8 +42,8 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:8px; /* compacter */
-    padding:8px 12px 12px; /* compacter */
+    gap:8px;
+    padding:8px 12px 12px;
   }
 
   .toolbar{
@@ -58,7 +58,7 @@
     background:#fff;
     border:1px solid var(--border);
     color:#111827;
-    padding:7px 11px; /* compacter */
+    padding:7px 11px;
     border-radius:10px;
     font-weight:900;
     cursor:pointer;
@@ -72,7 +72,7 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:10px; /* iets compacter */
+    gap:10px;
     overflow:hidden;
   }
   .group{
@@ -80,19 +80,19 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:6px; /* compacter */
+    gap:6px;
   }
 
-  /* ✅ COMPACTE LABELS */
+  /* compacte labels */
   .group-label{
     flex:0 0 auto;
     background:var(--label);
     border:1px solid var(--border);
-    border-radius:8px;          /* kleiner */
-    padding:4px 8px;            /* kleiner */
+    border-radius:8px;
+    padding:4px 8px;
     font-weight:1000;
     letter-spacing:.2px;
-    font-size:clamp(12px, 2.0vw, 14px); /* kleiner */
+    font-size:clamp(12px, 2.0vw, 14px);
     line-height:1.1;
   }
 
@@ -101,7 +101,7 @@
     display:grid;
     grid-template-columns:repeat(var(--cols), var(--tile));
     grid-auto-rows:var(--tile);
-    gap:var(--gap); /* ✅ dynamisch */
+    gap:var(--gap);
     justify-content:center;
     align-content:start;
     flex:1 1 auto;
@@ -118,7 +118,7 @@
     grid-template-rows:auto 1fr auto;
     align-items:center;
     justify-items:center;
-    padding:7px; /* iets compacter zodat content niet knelt */
+    padding:7px;
     gap:4px;
     position:relative;
     user-select:none;
@@ -167,7 +167,7 @@
   .table.status-koffie{ background:var(--koffie); }
   .table.status-rekening{ background:var(--rekening); }
 
-  /* ===== Overlays ===== */
+  /* overlays */
   .overlay{
     position:fixed; inset:0;
     background:rgba(0,0,0,.6);
@@ -282,6 +282,7 @@
   }
   .input-hint{ font-size:12px; color:var(--muted); }
 
+  /* fullscreen boodschap: alleen tekst */
   .alert-screen{
     position:fixed; inset:0;
     background:#fff; color:#000;
@@ -436,22 +437,22 @@ const cancelNoteBtn = document.getElementById('cancelNote');
 
 const resetAllBtn = document.getElementById('resetAll');
 
-const helpBtn = document.getElementById('helpBtn');
-const helpOverlay = document.getElementById('helpOverlay');
-const helpCancel = document.getElementById('helpCancel');
+const helpBtnEl = document.getElementById('helpBtn');
+const helpOverlayEl = document.getElementById('helpOverlay');
+const helpCancelEl = document.getElementById('helpCancel');
 
-const textBtn = document.getElementById('textBtn');
-const textOverlay = document.getElementById('textOverlay');
-const textCancel = document.getElementById('textCancel');
-const openCustomText = document.getElementById('openCustomText');
+const textBtnEl = document.getElementById('textBtn');
+const textOverlayEl = document.getElementById('textOverlay');
+const textCancelEl = document.getElementById('textCancel');
+const openCustomTextEl = document.getElementById('openCustomText');
 
-const customTextOverlay = document.getElementById('customTextOverlay');
-const customTextInput = document.getElementById('customTextInput');
-const customTextSend = document.getElementById('customTextSend');
-const customTextClose = document.getElementById('customTextClose');
+const customTextOverlayEl = document.getElementById('customTextOverlay');
+const customTextInputEl = document.getElementById('customTextInput');
+const customTextSendEl = document.getElementById('customTextSend');
+const customTextCloseEl = document.getElementById('customTextClose');
 
-const alertScreen = document.getElementById('alertScreen');
-const alertText = document.getElementById('alertText');
+const alertScreenEl = document.getElementById('alertScreen');
+const alertTextEl = document.getElementById('alertText');
 
 /* ===== State ===== */
 let rows = new Map();
@@ -464,7 +465,7 @@ let eventsChannel = null;
 async function fetchAll(){
   const { data, error } = await sb.from('tables_status').select('*');
   if(error){ console.error('fetchAll error', error); return; }
-  rows = new Map(data.map(r=>[keyOf(r.zone,r.table_num), r]));
+  rows = new Map((data||[]).map(r=>[keyOf(r.zone,r.table_num), r]));
 }
 
 async function upsertTable(zone, num, patch){
@@ -501,6 +502,64 @@ function fmtElapsed(ms){
   const h = Math.floor(total/3600);
   const pad = n => n<10 ? '0'+n : ''+n;
   return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+
+/* ✅ Dynamische gap: klein op kleine schermen, groter op grote */
+function applyResponsiveGap(){
+  const minSide = Math.min(window.innerWidth, window.innerHeight);
+  let gap = Math.round(minSide / 90);
+  gap = Math.max(5, Math.min(12, gap));
+  document.documentElement.style.setProperty('--gap', gap + 'px');
+}
+
+/* ✅ Tiles maximaal maar alles past */
+function layoutToFit(){
+  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
+
+  const avail = groupsEl.getBoundingClientRect();
+  const availW = Math.floor(avail.width);
+  const availH = Math.floor(avail.height);
+
+  // echte labelhoogte
+  const labels = groupsEl.querySelectorAll('.group-label');
+  let labelH = 0;
+  labels.forEach(l=> labelH += Math.ceil(l.getBoundingClientRect().height));
+
+  const betweenGroups = 10; // gelijk aan .groups gap
+  const N_b = expandRanges(RANGES_BENEDEN).length; // 13
+  const N_t = expandRanges(RANGES_BOVEN).length;   // 39
+
+  let best = null;
+
+  for(let cb=1; cb<=N_b; cb++){
+    const rb = Math.ceil(N_b / cb);
+    const tileW_b = Math.floor((availW - (cb-1)*gap) / cb);
+
+    for(let ct=1; ct<=N_t; ct++){
+      const rt = Math.ceil(N_t / ct);
+      const tileW_t = Math.floor((availW - (ct-1)*gap) / ct);
+
+      const totalRows = rb + rt;
+      const gapsV = (rb-1 + rt-1) * gap + betweenGroups;
+      const tileH_limit = Math.floor((availH - labelH - gapsV) / totalRows);
+
+      const tileW_limit = Math.min(tileW_b, tileW_t);
+      const tile = Math.max(0, Math.min(tileH_limit, tileW_limit));
+
+      if(!best || tile > best.tile){
+        best = { cb, ct, tile };
+      }
+    }
+  }
+
+  if(!best || best.tile < 26) best = { cb:6, ct:10, tile:26 };
+
+  document.documentElement.style.setProperty('--tile', best.tile + 'px');
+
+  document.querySelectorAll('.group-grid').forEach(grid=>{
+    const zone = grid.dataset.zone;
+    grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
+  });
 }
 
 /* ===== Render ===== */
@@ -586,8 +645,8 @@ function render(){
   tick();
   timerInterval = setInterval(tick, 1000);
 
-  applyResponsiveGap();  // ✅ dynamische gap
-  layoutToFit();         // ✅ tiles maximaal
+  applyResponsiveGap();
+  layoutToFit();
 }
 
 /* ===== Modal panes ===== */
@@ -677,14 +736,14 @@ function showBroadcast(message){
   const msg = (message || '').toString().trim();
   if(!msg) return;
 
-  alertText.textContent = msg;
-  alertScreen.classList.add('show');
+  alertTextEl.textContent = msg;
+  alertScreenEl.classList.add('show');
 
   const close = ()=>{
-    alertScreen.classList.remove('show');
-    alertScreen.removeEventListener('click', close);
+    alertScreenEl.classList.remove('show');
+    alertScreenEl.removeEventListener('click', close);
   };
-  alertScreen.addEventListener('click', close);
+  alertScreenEl.addEventListener('click', close);
   setTimeout(close, 6000);
 }
 async function sendBroadcast(message){
@@ -695,52 +754,48 @@ async function sendBroadcast(message){
 }
 
 /* HELP */
-const helpBtn = document.getElementById('helpBtn');
-const helpOverlay = document.getElementById('helpOverlay');
-const helpCancel = document.getElementById('helpCancel');
-
-helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
-helpOverlay.addEventListener('click', (e)=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
-helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
-helpOverlay.querySelectorAll('[data-broadcast]').forEach(btn=>{
+helpBtnEl.addEventListener('click', ()=> helpOverlayEl.classList.add('open'));
+helpOverlayEl.addEventListener('click', (e)=>{ if(e.target===helpOverlayEl) helpOverlayEl.classList.remove('open'); });
+helpCancelEl.addEventListener('click', ()=> helpOverlayEl.classList.remove('open'));
+helpOverlayEl.querySelectorAll('[data-broadcast]').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
     const msg = btn.dataset.broadcast;
-    helpOverlay.classList.remove('open');
+    helpOverlayEl.classList.remove('open');
     await sendBroadcast(msg);
     showBroadcast(msg);
   });
 });
 
 /* TEXT */
-textBtn.addEventListener('click', ()=> textOverlay.classList.add('open'));
-textOverlay.addEventListener('click', (e)=>{ if(e.target===textOverlay) textOverlay.classList.remove('open'); });
-textCancel.addEventListener('click', ()=> textOverlay.classList.remove('open'));
+textBtnEl.addEventListener('click', ()=> textOverlayEl.classList.add('open'));
+textOverlayEl.addEventListener('click', (e)=>{ if(e.target===textOverlayEl) textOverlayEl.classList.remove('open'); });
+textCancelEl.addEventListener('click', ()=> textOverlayEl.classList.remove('open'));
 
-textOverlay.querySelectorAll('[data-text]').forEach(btn=>{
+textOverlayEl.querySelectorAll('[data-text]').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
     const msg = btn.dataset.text;
-    textOverlay.classList.remove('open');
+    textOverlayEl.classList.remove('open');
     await sendBroadcast(msg);
     showBroadcast(msg);
   });
 });
-openCustomText.addEventListener('click', ()=>{
-  textOverlay.classList.remove('open');
-  customTextInput.value = '';
-  customTextOverlay.classList.add('open');
-  setTimeout(()=>customTextInput.focus(), 50);
+openCustomTextEl.addEventListener('click', ()=>{
+  textOverlayEl.classList.remove('open');
+  customTextInputEl.value = '';
+  customTextOverlayEl.classList.add('open');
+  setTimeout(()=>customTextInputEl.focus(), 50);
 });
-customTextClose.addEventListener('click', ()=> customTextOverlay.classList.remove('open'));
-customTextOverlay.addEventListener('click', (e)=>{ if(e.target===customTextOverlay) customTextOverlay.classList.remove('open'); });
+customTextCloseEl.addEventListener('click', ()=> customTextOverlayEl.classList.remove('open'));
+customTextOverlayEl.addEventListener('click', (e)=>{ if(e.target===customTextOverlayEl) customTextOverlayEl.classList.remove('open'); });
 async function sendCustom(){
-  const msg = customTextInput.value.trim();
+  const msg = customTextInputEl.value.trim();
   if(!msg) return;
-  customTextOverlay.classList.remove('open');
+  customTextOverlayEl.classList.remove('open');
   await sendBroadcast(msg);
   showBroadcast(msg);
 }
-customTextSend.addEventListener('click', sendCustom);
-customTextInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendCustom(); }});
+customTextSendEl.addEventListener('click', sendCustom);
+customTextInputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendCustom(); }});
 
 /* Realtime */
 function subscribeRealtimeTables(){
@@ -772,71 +827,7 @@ function subscribeBroadcasts(){
     .subscribe();
 }
 
-/* ✅ Dynamische gap: klein op kleine schermen, ruim op grote */
-function applyResponsiveGap(){
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const minSide = Math.min(w, h);
-
-  // Richtwaarden:
-  // - kleine iPhones: 5-6px
-  // - iPad: 8px
-  // - grote schermen: 10-12px
-  let gap = Math.round(minSide / 90); // schaal
-  gap = Math.max(5, Math.min(12, gap)); // clamp 5..12
-
-  document.documentElement.style.setProperty('--gap', gap + 'px');
-}
-
-/* ✅ Tiles maximaal maar alles past */
-function layoutToFit(){
-  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
-  const avail = groupsEl.getBoundingClientRect();
-  const availW = Math.floor(avail.width);
-  const availH = Math.floor(avail.height);
-
-  // echte labelhoogte meten
-  const labels = groupsEl.querySelectorAll('.group-label');
-  let labelH = 0;
-  labels.forEach(l=> labelH += Math.ceil(l.getBoundingClientRect().height));
-
-  const betweenGroups = 10; // gelijk aan .groups gap (iets compacter)
-  const N_b = expandRanges(RANGES_BENEDEN).length; // 13
-  const N_t = expandRanges(RANGES_BOVEN).length;   // 39
-
-  let best = null;
-
-  for(let cb=1; cb<=N_b; cb++){
-    const rb = Math.ceil(N_b / cb);
-    const tileW_b = Math.floor((availW - (cb-1)*gap) / cb);
-
-    for(let ct=1; ct<=N_t; ct++){
-      const rt = Math.ceil(N_t / ct);
-      const tileW_t = Math.floor((availW - (ct-1)*gap) / ct);
-
-      const totalRows = rb + rt;
-      const gapsV = (rb-1 + rt-1) * gap + betweenGroups;
-      const tileH_limit = Math.floor((availH - labelH - gapsV) / totalRows);
-
-      const tileW_limit = Math.min(tileW_b, tileW_t);
-      const tile = Math.max(0, Math.min(tileH_limit, tileW_limit));
-
-      if(!best || tile > best.tile){
-        best = { cb, ct, tile };
-      }
-    }
-  }
-
-  if(!best || best.tile < 26) best = { cb:6, ct:10, tile:26 };
-
-  document.documentElement.style.setProperty('--tile', best.tile + 'px');
-
-  document.querySelectorAll('.group-grid').forEach(grid=>{
-    const zone = grid.dataset.zone;
-    grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
-  });
-}
-
+/* Resize handling */
 let raf=null;
 function scheduleLayout(){
   if(raf) cancelAnimationFrame(raf);
@@ -853,10 +844,8 @@ window.addEventListener('orientationchange', ()=>setTimeout(()=>{ applyResponsiv
 (async function init(){
   await fetchAll();
   render();
-
   subscribeRealtimeTables();
   subscribeBroadcasts();
-
   autoDailyResetCheck();
   applyResponsiveGap();
   layoutToFit();
