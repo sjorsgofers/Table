@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Tafeloverzicht</title>
+
 <style>
   :root{
     --bg:#f6f7f9; --card:#fff; --text:#111827; --muted:#6b7280;
@@ -72,15 +73,15 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:10px;
+    gap:10px;            /* used by layoutToFit (betweenGroups) */
     overflow:hidden;
   }
   .group{
-    flex:1 1 0;
     min-height:0;
     display:flex;
     flex-direction:column;
     gap:6px;
+    /* flex is set dynamically in JS based on row counts (prevents big empty gap) */
   }
 
   /* compacte labels */
@@ -504,7 +505,7 @@ function fmtElapsed(ms){
   return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
-/* ✅ Dynamische gap: klein op kleine schermen, groter op grote */
+/* ✅ Dynamische gap */
 function applyResponsiveGap(){
   const minSide = Math.min(window.innerWidth, window.innerHeight);
   let gap = Math.round(minSide / 90);
@@ -512,7 +513,7 @@ function applyResponsiveGap(){
   document.documentElement.style.setProperty('--gap', gap + 'px');
 }
 
-/* ✅ Tiles maximaal maar alles past */
+/* ✅ Tiles maximaal + hoogte verdelen op rij-aantal (geen groot leeg gat) */
 function layoutToFit(){
   const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
 
@@ -520,12 +521,11 @@ function layoutToFit(){
   const availW = Math.floor(avail.width);
   const availH = Math.floor(avail.height);
 
-  // echte labelhoogte
   const labels = groupsEl.querySelectorAll('.group-label');
   let labelH = 0;
   labels.forEach(l=> labelH += Math.ceil(l.getBoundingClientRect().height));
 
-  const betweenGroups = 10; // gelijk aan .groups gap
+  const betweenGroups = 10; // match .groups gap
   const N_b = expandRanges(RANGES_BENEDEN).length; // 13
   const N_t = expandRanges(RANGES_BOVEN).length;   // 39
 
@@ -541,18 +541,26 @@ function layoutToFit(){
 
       const totalRows = rb + rt;
       const gapsV = (rb-1 + rt-1) * gap + betweenGroups;
-      const tileH_limit = Math.floor((availH - labelH - gapsV) / totalRows);
 
+      const tileH_limit = Math.floor((availH - labelH - gapsV) / totalRows);
       const tileW_limit = Math.min(tileW_b, tileW_t);
       const tile = Math.max(0, Math.min(tileH_limit, tileW_limit));
 
       if(!best || tile > best.tile){
-        best = { cb, ct, tile };
+        best = { cb, ct, rb, rt, tile };
       }
     }
   }
 
-  if(!best || best.tile < 26) best = { cb:6, ct:10, tile:26 };
+  if(!best || best.tile < 26){
+    best = {
+      cb: 6,
+      ct: 10,
+      rb: Math.ceil(N_b / 6),
+      rt: Math.ceil(N_t / 10),
+      tile: 26
+    };
+  }
 
   document.documentElement.style.setProperty('--tile', best.tile + 'px');
 
@@ -560,6 +568,12 @@ function layoutToFit(){
     const zone = grid.dataset.zone;
     grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
   });
+
+  // ✅ flex verdeling: hoogte in verhouding tot rijen
+  const benedenGroup = document.querySelector('.group[data-zone="bt"]');
+  const bovenGroup   = document.querySelector('.group[data-zone="boven"]');
+  if(benedenGroup) benedenGroup.style.flex = `${best.rb} 1 0%`;
+  if(bovenGroup)   bovenGroup.style.flex  = `${best.rt} 1 0%`;
 }
 
 /* ===== Render ===== */
@@ -572,6 +586,7 @@ function render(){
 
     const wrap = document.createElement('section');
     wrap.className = 'group';
+    wrap.dataset.zone = group.zone; // ✅ nodig voor flex verdeling
 
     const label = document.createElement('div');
     label.className = 'group-label';
@@ -827,7 +842,7 @@ function subscribeBroadcasts(){
     .subscribe();
 }
 
-/* Resize handling */
+/* Resize */
 let raf=null;
 function scheduleLayout(){
   if(raf) cancelAnimationFrame(raf);
