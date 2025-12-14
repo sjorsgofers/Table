@@ -25,14 +25,20 @@
   .title{font-weight:800; flex:1; font-size:clamp(16px,3vw,20px)}
   main{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:10px; padding:10px 14px 14px}
   .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-  .btn,.help-btn{appearance:none; border:1px solid var(--border); background:#fff; color:#111827; padding:7px 11px; border-radius:10px; cursor:pointer; font-weight:600; font-size:clamp(12px,2.4vw,14px)}
+  .btn,.help-btn{
+    appearance:none; border:1px solid var(--border); background:#fff; color:#111827;
+    padding:7px 11px; border-radius:10px; cursor:pointer; font-weight:600;
+    font-size:clamp(12px,2.4vw,14px)
+  }
   .help-btn{border:2px solid var(--nieuw); color:var(--nieuw); font-weight:900; letter-spacing:1px}
+  .text-btn{border:2px solid #111827; color:#111827; font-weight:900; letter-spacing:1px}
+
   .legend{display:flex; gap:12px; flex-wrap:wrap; align-items:center; font-size:clamp(11px,2.5vw,14px); color:#6b7280}
   .dot{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px}
   .dot.leeg{background:var(--soft);border:1px solid var(--border)}
   .dot.nieuw{background:var(--nieuw)} .dot.drank{background:var(--drank)} .dot.run{background:var(--run)} .dot.koffie{background:var(--koffie)} .dot.rekening{background:var(--rekening)}
 
-  /* De totale ruimte voor de groepen; geen scrollen meer */
+  /* Layout: alles moet passen, geen scroll */
   .groups{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:12px; overflow:hidden}
   .group{display:flex; flex-direction:column; gap:8px; min-height:0}
   .group-label{
@@ -41,8 +47,7 @@
     flex:0 0 auto;
   }
   .group-grid{
-    /* kolommen en tegelmaat worden in-line via CSS var gezet */
-    --cols: 5; 
+    --cols: 5;
     display:grid; grid-auto-rows:var(--tile);
     grid-template-columns:repeat(var(--cols), var(--tile));
     gap:var(--gap);
@@ -55,7 +60,6 @@
     border-radius:12px; background:var(--card); border:1px solid var(--border);
     display:grid; grid-template-rows:auto 1fr auto; align-items:center; justify-items:center; gap:4px;
     cursor:pointer; position:relative; user-select:none;
-    /* typografie schaalt mee met tegel */
     font-size:calc(var(--tile)*0.20);
   }
   .num{line-height:1; color:var(--text); font-weight:800}
@@ -80,36 +84,55 @@
   .table.status-koffie{background:var(--koffie)}
   .table.status-rekening{background:var(--rekening)}
 
-  /* Modal / overlay / help */
+  /* Generic overlay/modal */
   .overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647}
   .overlay.open{display:flex}
   .modal{width:100%; max-width:480px; background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.35); border:1px solid var(--border)}
   .modal-header{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:800}
   .modal-grid{padding:14px; display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
-  .choice{display:flex; align-items:center; gap:10px; border-radius:10px; padding:10px; cursor:pointer; border:1px solid var(--border); background:#fff; font-weight:700; justify-content:center; color:#111827}
+  .choice{display:flex; align-items:center; gap:10px; border-radius:10px; padding:10px; cursor:pointer; border:1px solid var(--border); background:#fff; font-weight:800; justify-content:center; color:#111827}
   .choice .swatch{width:16px; height:16px; border-radius:4px}
   .swatch.nieuw{background:var(--nieuw)} .swatch.drank{background:var(--drank)} .swatch.run{background:var(--run)} .swatch.koffie{background:var(--koffie)} .swatch.rekening{background:var(--rekening)}
   .choice.reset{border-color:#9ca3af; color:#374151}
   .modal-footer{padding:12px 14px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px}
-  .link{background:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700; color:#111827}
+  .link{background:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:800; color:#111827}
   .link.primary{color:#fff; background:#2563eb; border-color:#2563eb}
+  .danger{border-color:#ef4444; color:#ef4444}
+
+  /* Notitie editor */
   .note-editor{display:none; padding:14px; border-top:1px solid var(--border)}
   .note-editor.open{display:block}
   .note-editor textarea{width:100%; min-height:80px; border:1px solid var(--border); border-radius:10px; padding:10px; font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; resize:vertical}
   .note-actions{margin-top:10px; display:flex; gap:8px; justify-content:flex-end}
-  .danger{border-color:#ef4444; color:#ef4444}
 
-  .help-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647}
-  .help-overlay.open{display:flex}
-  .help-modal{width:100%; max-width:420px; background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
-  .help-header{padding:14px 16px; font-weight:900; color:#ef4444; border-bottom:1px solid var(--border)}
-  .help-grid{padding:14px; display:grid; gap:10px}
-  .help-opt{padding:14px; font-weight:800; border:2px solid #ef4444; color:#ef4444; background:#fff; border-radius:12px; cursor:pointer; text-align:center}
+  /* HELP + TEXT overlay menus */
+  .menu-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647}
+  .menu-overlay.open{display:flex}
+  .menu-modal{width:100%; max-width:420px; background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .menu-header{padding:14px 16px; font-weight:1000; border-bottom:1px solid var(--border)}
+  .menu-header.help{color:#ef4444}
+  .menu-header.text{color:#111827}
+  .menu-grid{padding:14px; display:grid; gap:10px}
+  .menu-opt{padding:14px; font-weight:900; border:2px solid #111827; color:#111827; background:#fff; border-radius:12px; cursor:pointer; text-align:center}
+  .menu-opt.help{border-color:#ef4444; color:#ef4444}
+  .menu-opt.cancel{border-color:#9ca3af; color:#374151}
 
+  /* Eigen invoer modal */
+  .input-wrap{padding:14px; display:grid; gap:10px}
+  .input-wrap input{
+    width:100%;
+    padding:12px 12px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    font:16px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  }
+  .input-hint{font-size:12px; color:#6b7280}
+
+  /* Fullscreen message screen */
   .alert-screen{position:fixed; inset:0; background:#fff; color:#000; display:none; align-items:center; justify-content:center; flex-direction:column; z-index:2147483647; text-align:center; padding:24px}
   .alert-screen.show{display:flex}
   .alert-title{font-size:clamp(30px,8vw,64px); line-height:1; font-weight:1000}
-  .alert-sub{font-size:clamp(18px,5vw,36px); font-weight:700; margin-top:14px}
+  .alert-sub{font-size:clamp(18px,5vw,36px); font-weight:800; margin-top:14px; white-space:pre-wrap; word-break:break-word; max-width:min(900px, 92vw)}
 </style>
 </head>
 <body>
@@ -120,6 +143,7 @@
   <div class="toolbar">
     <button class="btn" id="resetAll">Reset alles</button>
     <button id="helpBtn" class="help-btn">HELP</button>
+    <button id="textBtn" class="btn text-btn">TEXT</button>
   </div>
 
   <div class="legend">
@@ -131,7 +155,6 @@
     <span><span class="dot rekening"></span>Rekening</span>
   </div>
 
-  <!-- ✅ twee afzonderlijke groepen met eigen kolommen -->
   <div class="groups" id="groups"></div>
 </main>
 
@@ -164,20 +187,48 @@
   </div>
 </div>
 
-<!-- HELP Modal -->
-<div id="helpOverlay" class="help-overlay" aria-modal="true" role="dialog">
-  <div class="help-modal">
-    <div class="help-header">KIES HULPLOCATIE</div>
-    <div class="help-grid">
-      <button class="help-opt" data-help="Bar Beneden">Bar Beneden</button>
-      <button class="help-opt" data-help="Bar Boven">Bar Boven</button>
-      <button class="help-opt" data-help="Run">Run</button>
-      <button class="help-opt" id="helpCancel">Annuleren</button>
+<!-- HELP Menu -->
+<div id="helpOverlay" class="menu-overlay" aria-modal="true" role="dialog">
+  <div class="menu-modal">
+    <div class="menu-header help">KIES HULPLOCATIE</div>
+    <div class="menu-grid">
+      <button class="menu-opt help" data-broadcast="Bar Beneden">Bar Beneden</button>
+      <button class="menu-opt help" data-broadcast="Bar Boven">Bar Boven</button>
+      <button class="menu-opt help" data-broadcast="Run">Run</button>
+      <button class="menu-opt cancel" id="helpCancel">Annuleren</button>
     </div>
   </div>
 </div>
 
-<!-- Assistentie overlay -->
+<!-- TEXT Menu -->
+<div id="textOverlay" class="menu-overlay" aria-modal="true" role="dialog">
+  <div class="menu-modal">
+    <div class="menu-header text">KIES BERICHT</div>
+    <div class="menu-grid">
+      <button class="menu-opt" data-text="Boven uithalen">Boven uithalen</button>
+      <button class="menu-opt" data-text="IJs brengen">IJs brengen</button>
+      <button class="menu-opt" id="openCustomText">Eigen invoer</button>
+      <button class="menu-opt cancel" id="textCancel">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Eigen invoer modal -->
+<div id="customTextOverlay" class="overlay" aria-modal="true" role="dialog">
+  <div class="modal">
+    <div class="modal-header">Eigen bericht</div>
+    <div class="input-wrap">
+      <input id="customTextInput" type="text" maxlength="80" placeholder="Typ een bericht (max 80 tekens)..." />
+      <div class="input-hint">Dit bericht wordt 6 sec. op alle apparaten getoond en verdwijnt direct bij 1 tik.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="link" id="customTextClose">Sluiten</button>
+      <button class="link primary" id="customTextSend">Versturen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen message screen -->
 <div id="alertScreen" class="alert-screen" aria-live="assertive" aria-atomic="true">
   <div class="alert-title">Assistentie gevraagd</div>
   <div id="alertSub" class="alert-sub"></div>
@@ -219,10 +270,21 @@ const deleteNoteBtn=document.getElementById('deleteNote');
 const cancelNoteBtn=document.getElementById('cancelNote');
 const choiceBtns=overlay.querySelectorAll('.choice');
 const resetAllBtn=document.getElementById('resetAll');
+
 const helpBtn=document.getElementById('helpBtn');
 const helpOverlay=document.getElementById('helpOverlay');
-const helpOpts=helpOverlay.querySelectorAll('.help-opt[data-help]');
 const helpCancel=document.getElementById('helpCancel');
+
+const textBtn=document.getElementById('textBtn');
+const textOverlay=document.getElementById('textOverlay');
+const textCancel=document.getElementById('textCancel');
+const openCustomText=document.getElementById('openCustomText');
+
+const customTextOverlay=document.getElementById('customTextOverlay');
+const customTextInput=document.getElementById('customTextInput');
+const customTextSend=document.getElementById('customTextSend');
+const customTextClose=document.getElementById('customTextClose');
+
 const alertScreen=document.getElementById('alertScreen');
 const alertSub=document.getElementById('alertSub');
 
@@ -230,7 +292,7 @@ const alertSub=document.getElementById('alertSub');
 let rows = new Map();
 let timerInterval=null;
 let pendingTableEl=null;
-let tableChannel=null, helpChannel=null;
+let tableChannel=null, eventsChannel=null;
 let lastRealtimeAt=0;
 
 /* ===== Data IO ===== */
@@ -250,7 +312,7 @@ async function upsertByNumber(n, patch){
   return data;
 }
 
-/* ===== Helpers for DOM ===== */
+/* ===== Helpers ===== */
 function ensureChild(cell, selector, className){
   let el = cell.querySelector(selector);
   if(!el){ el = document.createElement('div'); el.className = className; cell.appendChild(el); }
@@ -281,10 +343,11 @@ function render(){
 
   for(const group of GROUPS){
     const nums = expandRanges(group.ranges);
-    // groep container
+
     const wrap = document.createElement('section'); wrap.className='group';
     const label = document.createElement('div'); label.className='group-label'; label.textContent=group.label;
     const grid = document.createElement('div'); grid.className='group-grid'; grid.dataset.zone = group.zone;
+
     wrap.appendChild(label); wrap.appendChild(grid);
     groupsEl.appendChild(wrap);
 
@@ -294,9 +357,9 @@ function render(){
       cell.className='table'; cell.type='button'; cell.dataset.num=n; cell.dataset.zone=group.zone;
 
       const numEl=document.createElement('div'); numEl.className='num'; numEl.textContent=n; cell.appendChild(numEl);
-      const spacer=document.createElement('div'); spacer.style.height='1px'; spacer.style.width='1px'; cell.appendChild(spacer); // balans
-      const noteEl=document.createElement('div'); noteEl.className='note'; noteEl.textContent=''; cell.appendChild(noteEl);
-      const timerEl=document.createElement('div'); timerEl.className='timer'; timerEl.textContent=''; cell.appendChild(timerEl);
+      const mid=document.createElement('div'); mid.style.width='1px'; mid.style.height='1px'; cell.appendChild(mid);
+      const noteEl=document.createElement('div'); noteEl.className='note'; cell.appendChild(noteEl);
+      const timerEl=document.createElement('div'); timerEl.className='timer'; cell.appendChild(timerEl);
 
       applyStatusClass(cell, r.status || null);
       setNote(cell, r.note || '');
@@ -323,7 +386,6 @@ function render(){
     }
   }
 
-  // start timer render
   function tick(){
     const now = Date.now();
     document.querySelectorAll('.table').forEach(cell=>{
@@ -340,7 +402,6 @@ function render(){
   tick();
   timerInterval = setInterval(tick, 1000);
 
-  // na opbouw → layout berekenen
   layoutToFit();
 }
 
@@ -354,7 +415,6 @@ choiceBtns.forEach(btn=>{
     if(!pendingTableEl) return;
     const choice = btn.dataset.choice;
     const n = Number(pendingTableEl.dataset.num);
-    const z = pendingTableEl.dataset.zone;
 
     if(choice === 'reset'){
       await upsertByNumber(n, { num_marked:false });
@@ -375,23 +435,27 @@ choiceBtns.forEach(btn=>{
 /* ===== Notities ===== */
 openNoteBtn.addEventListener('click',()=>{ if(pendingTableEl) showNotePane(); });
 saveNoteBtn.addEventListener('click', async ()=>{
-  if(!pendingTableEl) return; const n = Number(pendingTableEl.dataset.num);
-  const text = noteInput.value.trim(); await upsertByNumber(n, { note: text || null });
-  const noteEl = pendingTableEl.querySelector('.note'); if(noteEl) noteEl.textContent = text;
+  if(!pendingTableEl) return;
+  const n = Number(pendingTableEl.dataset.num);
+  const text = noteInput.value.trim();
+  await upsertByNumber(n, { note: text || null });
+  pendingTableEl.querySelector('.note').textContent = text;
   overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
 });
 deleteNoteBtn.addEventListener('click', async ()=>{
-  if(!pendingTableEl) return; const n = Number(pendingTableEl.dataset.num);
-  await upsertByNumber(n, { note: null }); const noteEl = pendingTableEl.querySelector('.note'); if(noteEl) noteEl.textContent = '';
+  if(!pendingTableEl) return;
+  const n = Number(pendingTableEl.dataset.num);
+  await upsertByNumber(n, { note: null });
+  pendingTableEl.querySelector('.note').textContent = '';
   overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
 });
 cancelNoteBtn.addEventListener('click',()=>{ showChoicesPane(); });
 
 /* ===== Overlay close ===== */
-document.getElementById('cancelModal').addEventListener('click',()=>{ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); });
+cancelBtn.addEventListener('click',()=>{ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); });
 overlay.addEventListener('click',e=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); }});
 
-/* ===== Reset (knop + auto 02:00) ===== */
+/* ===== Reset ===== */
 async function fullResetAll(){
   for(const g of GROUPS){
     for(const n of expandRanges(g.ranges)){
@@ -401,8 +465,9 @@ async function fullResetAll(){
   }
   render();
 }
-document.getElementById('resetAll').addEventListener('click', fullResetAll);
+resetAllBtn.addEventListener('click', fullResetAll);
 
+/* Auto reset om 02:00 */
 async function autoDailyResetCheck(){
   const now = new Date(); const hh = now.getHours(); const mm = now.getMinutes();
   const todayKey = now.toISOString().slice(0,10); const last = localStorage.getItem('last_auto_reset');
@@ -410,25 +475,37 @@ async function autoDailyResetCheck(){
 }
 setInterval(autoDailyResetCheck, 60_000);
 
-/* ===== HELP ===== */
-function showAlert(kind){
-  alertSub.textContent = kind; alertScreen.classList.add('show');
-  const close = ()=>{ alertScreen.classList.remove('show'); alertScreen.removeEventListener('click', close); };
-  alertScreen.addEventListener('click', close); setTimeout(close, 6000);
+/* ===== Fullscreen message (HELP + TEXT) ===== */
+function showBroadcast(message){
+  alertSub.textContent = message;
+  alertScreen.classList.add('show');
+
+  const close = ()=>{
+    alertScreen.classList.remove('show');
+    alertScreen.removeEventListener('click', close);
+  };
+  alertScreen.addEventListener('click', close);
+  setTimeout(close, 6000);
 }
-async function sendHelp(kind){ const { error } = await sb.from('help_events').insert({ kind }); if(error) console.error('help insert error', error); }
-function subscribeRealtimeHelp(){
-  if(helpChannel){ sb.removeChannel(helpChannel); }
-  helpChannel = sb.channel('help_events:all')
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'help_events' }, p=>{ if(p?.new?.kind) showAlert(p.new.kind); })
+
+/* ✅ Eén centrale broadcast naar Supabase */
+async function sendBroadcast(message){
+  const msg = (message || '').toString().trim();
+  if(!msg) return;
+  const { error } = await sb.from('help_events').insert({ kind: msg }); // hergebruik bestaande tabel
+  if(error){ console.error('broadcast insert error', error); }
+}
+
+/* Subscribe op broadcasts */
+function subscribeBroadcasts(){
+  if(eventsChannel){ sb.removeChannel(eventsChannel); }
+  eventsChannel = sb.channel('help_events:all')
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'help_events' }, payload=>{
+      const row = payload?.new;
+      if(row?.kind) showBroadcast(row.kind);
+    })
     .subscribe();
 }
-helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
-helpOverlay.addEventListener('click', e=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
-helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
-helpOpts.forEach(btn=> btn.addEventListener('click', async ()=>{
-  const kind = btn.dataset.help; helpOverlay.classList.remove('open'); await sendHelp(kind); showAlert(kind);
-}));
 
 /* ===== Realtime tafels ===== */
 function subscribeRealtimeTables(){
@@ -457,21 +534,63 @@ setInterval(async ()=>{
   }
 }, 6000);
 
-/* ===== ✅ Dynamische layout zodat ALLES past =====
-   We zoeken de beste kolomverdeling voor Beneden (13) en Boven (39)
-   en één tegelmaat die zowel in breedte als hoogte past. */
+/* ===== HELP UI ===== */
+helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
+helpOverlay.addEventListener('click', e=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
+helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
+helpOverlay.querySelectorAll('[data-broadcast]').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    const msg = btn.dataset.broadcast;
+    helpOverlay.classList.remove('open');
+    await sendBroadcast(msg);
+    showBroadcast(msg);
+  });
+});
+
+/* ===== TEXT UI ===== */
+textBtn.addEventListener('click', ()=> textOverlay.classList.add('open'));
+textOverlay.addEventListener('click', e=>{ if(e.target===textOverlay) textOverlay.classList.remove('open'); });
+textCancel.addEventListener('click', ()=> textOverlay.classList.remove('open'));
+
+/* Presets */
+textOverlay.querySelectorAll('[data-text]').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    const msg = btn.dataset.text;
+    textOverlay.classList.remove('open');
+    await sendBroadcast(msg);
+    showBroadcast(msg);
+  });
+});
+
+/* Eigen invoer */
+openCustomText.addEventListener('click', ()=>{
+  textOverlay.classList.remove('open');
+  customTextInput.value = '';
+  customTextOverlay.classList.add('open');
+  setTimeout(()=>customTextInput.focus(), 50);
+});
+customTextClose.addEventListener('click', ()=> customTextOverlay.classList.remove('open'));
+customTextOverlay.addEventListener('click', e=>{ if(e.target===customTextOverlay) customTextOverlay.classList.remove('open'); });
+
+async function sendCustom(){
+  const msg = customTextInput.value.trim();
+  if(!msg) return;
+  customTextOverlay.classList.remove('open');
+  await sendBroadcast(msg);
+  showBroadcast(msg);
+}
+customTextSend.addEventListener('click', sendCustom);
+customTextInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); sendCustom(); }});
+
+/* ===== ✅ Dynamische layout zodat ALLES past ===== */
 function layoutToFit(){
   const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
-
-  // meet beschikbare ruimte
-  const headerH = 0; // al verdisconteerd in flow
   const groupsRect = groupsEl.getBoundingClientRect();
   const availW = Math.floor(groupsRect.width);
   const availH = Math.floor(groupsRect.height);
 
-  // labels + verticale gaps
-  const LABEL_H = 34;        // schatting; consistent genoeg
-  const BETWEEN_GROUPS = 12; // CSS-gap tussen groepen
+  const LABEL_H = 34;
+  const BETWEEN_GROUPS = 12;
 
   const N_b = expandRanges(RANGES_BENEDEN).length; // 13
   const N_t = expandRanges(RANGES_BOVEN).length;   // 39
@@ -486,41 +605,30 @@ function layoutToFit(){
       const rt = Math.ceil(N_t / ct);
       const tileW_t = Math.floor( (availW - (ct-1)*gap) / ct );
 
-      // totaal benodigde rijen (alle tegels) + gaps + labels
       const totalRows = rb + rt;
       const totalGapsV = (rb-1 + rt-1) * gap + BETWEEN_GROUPS;
-      const labelsH = 2 * (LABEL_H + 8); // label + margin per groep
+      const labelsH = 2 * (LABEL_H + 8);
 
-      // hoogte beperkt tegelmaat:
       const tileH_limit = Math.floor( (availH - labelsH - totalGapsV) / totalRows );
-
-      // breedte beperkt per groep:
       const tileW_limit = Math.min(tileW_b, tileW_t);
-
       const tile = Math.max(0, Math.min(tileH_limit, tileW_limit));
 
       if(!best || tile > best.tile){
-        best = { cb, rb, ct, rt, tile };
+        best = { cb, ct, rb, rt, tile };
       }
     }
   }
 
-  // val terug op iets als de ruimte extreem klein is
-  if(!best || best.tile < 24){ best = best || {cb:5,ct:8,tile:24}; best.tile = 24; }
+  if(!best || best.tile < 22){ best = best || {cb:5,ct:8,tile:22}; best.tile = 22; }
 
-  // zet CSS variabelen + kolommen per groep
   document.documentElement.style.setProperty('--tile', best.tile+'px');
 
-  // schrijf kolommen op het juiste grid
-  const grids = document.querySelectorAll('.group-grid');
-  grids.forEach(grid=>{
+  document.querySelectorAll('.group-grid').forEach(grid=>{
     const zone = grid.dataset.zone;
-    const cols = (zone === 'bt') ? best.cb : best.ct;
-    grid.style.setProperty('--cols', cols);
+    grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
   });
 }
 
-/* debounced resize */
 let rAFid=null;
 function scheduleLayout(){ if(rAFid) cancelAnimationFrame(rAFid); rAFid = requestAnimationFrame(()=>{ rAFid=null; layoutToFit(); }); }
 window.addEventListener('resize', scheduleLayout);
@@ -531,7 +639,7 @@ window.addEventListener('orientationchange', ()=>setTimeout(layoutToFit, 50));
   await fetchAll();
   render();
   subscribeRealtimeTables();
-  subscribeRealtimeHelp();
+  subscribeBroadcasts();
   autoDailyResetCheck();
   layoutToFit();
 })();
