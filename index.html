@@ -1,34 +1,31 @@
 <!doctype html>
 <html lang="nl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Tafeloverzicht</title>
 
 <style>
 :root{
   --bg:#f6f7f9;
   --card:#ffffff;
-  --text:#111827;
   --border:#e5e7eb;
-
+  --text:#111827;
   --nieuw:#ef4444;
   --drank:#f59e0b;
   --run:#10b981;
   --koffie:#7c3aed;
   --rekening:#0ea5e9;
-
   --gap:8px;
-  --tile:72px;
+  --tile:80px;
 }
 
 *{box-sizing:border-box}
-html,body{height:100%}
+html,body{height:100%;margin:0}
 
 body{
-  margin:0;
-  background:var(--bg);
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
   display:flex;
   flex-direction:column;
 }
@@ -40,22 +37,13 @@ header{
   padding:10px 14px;
   display:flex;
   align-items:center;
+  gap:8px;
 }
 header h1{
-  margin:0;
+  flex:1;
   font-size:18px;
-  font-weight:900;
-  flex:1;
-}
-
-/* MAIN */
-main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:10px 14px;
-  min-height:0;
+  margin:0;
+  font-weight:800;
 }
 
 /* TOOLBAR */
@@ -64,16 +52,26 @@ main{
   gap:8px;
   flex-wrap:wrap;
 }
-.btn{
+button{
   border:1px solid var(--border);
   background:#fff;
-  padding:6px 12px;
+  padding:8px 12px;
   border-radius:10px;
-  font-weight:800;
+  font-weight:700;
   cursor:pointer;
 }
-.help-btn{border:2px solid var(--nieuw); color:var(--nieuw)}
-.text-btn{border:2px solid #111; font-weight:900}
+button.help{border:2px solid var(--nieuw); color:var(--nieuw)}
+button.text{border:2px solid #111}
+
+/* MAIN */
+main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:10px;
+  overflow:hidden;
+}
 
 /* GROUPS */
 .groups{
@@ -96,15 +94,11 @@ main{
   border-radius:10px;
   font-weight:900;
 }
-
-/* GRID */
 .group-grid{
   display:grid;
-  grid-template-columns:repeat(var(--cols), var(--tile));
-  grid-auto-rows:var(--tile);
   gap:var(--gap);
+  grid-template-columns:repeat(var(--cols),var(--tile));
   justify-content:center;
-  flex:1;
 }
 
 /* TABLE */
@@ -116,38 +110,33 @@ main{
   border-radius:12px;
   display:grid;
   grid-template-rows:auto 1fr auto;
-  align-items:center;
-  justify-items:center;
+  place-items:center;
   position:relative;
-  cursor:pointer;
-  font-weight:900;
+  font-weight:800;
 }
-.num{
-  font-size:calc(var(--tile)*0.22);
-}
-.num.flagged{color:var(--nieuw)}
+.table[data-status]{color:#fff;border:none}
+.table.nieuw{background:var(--nieuw)}
+.table.drank{background:var(--drank)}
+.table.run{background:var(--run)}
+.table.koffie{background:var(--koffie)}
+.table.rekening{background:var(--rekening)}
+
+.num{font-size:calc(var(--tile)*0.22)}
+.num.flag{color:var(--nieuw)}
+.table[data-status] .num{color:#fff}
+
 .note{
-  font-size:calc(var(--tile)*0.14);
+  font-size:calc(var(--tile)*0.13);
   text-align:center;
   padding:0 4px;
-  line-height:1.1;
 }
 .timer{
   position:absolute;
-  bottom:4px;
-  font-size:calc(var(--tile)*0.14);
+  bottom:6px;
+  font-size:calc(var(--tile)*0.13);
 }
 
-/* STATUS COLORS */
-.table[data-status]{color:#fff; border:none}
-.table[data-status] .num{color:#fff}
-.table.status-nieuw{background:var(--nieuw)}
-.table.status-drank{background:var(--drank)}
-.table.status-run{background:var(--run)}
-.table.status-koffie{background:var(--koffie)}
-.table.status-rekening{background:var(--rekening)}
-
-/* MODALS */
+/* OVERLAYS */
 .overlay{
   position:fixed;
   inset:0;
@@ -157,34 +146,26 @@ main{
   justify-content:center;
   z-index:9999;
 }
-.overlay.open{display:flex}
+.overlay.show{display:flex}
+
 .modal{
   background:#fff;
   border-radius:14px;
   width:90%;
   max-width:420px;
-  border:1px solid var(--border);
-}
-.modal-header{
   padding:14px;
-  font-weight:900;
-  border-bottom:1px solid var(--border);
+}
+.modal h2{
+  margin:0 0 10px;
+  font-size:18px;
 }
 .modal-grid{
-  padding:14px;
   display:grid;
   gap:10px;
 }
-.choice{
-  padding:12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  font-weight:800;
-  cursor:pointer;
-}
-.choice.reset{border-color:#999}
+.modal-grid button{width:100%}
 
-/* FULLSCREEN MESSAGE */
+/* ALERT SCREEN */
 .alert-screen{
   position:fixed;
   inset:0;
@@ -196,10 +177,17 @@ main{
 }
 .alert-screen.show{display:flex}
 .alert-only{
-  font-size:clamp(36px, 9vw, 90px);
+  font-size:clamp(40px,10vw,96px);
   font-weight:1000;
   text-align:center;
   padding:20px;
+}
+
+/* INPUT */
+input,textarea{
+  width:100%;
+  padding:10px;
+  font-size:16px;
 }
 </style>
 </head>
@@ -208,141 +196,136 @@ main{
 
 <header>
   <h1>Tafeloverzicht</h1>
+  <div class="toolbar">
+    <button id="resetAll">Reset</button>
+    <button class="help" id="helpBtn">HELP</button>
+    <button class="text" id="textBtn">TEXT</button>
+  </div>
 </header>
 
 <main>
-  <div class="toolbar">
-    <button id="resetAll" class="btn">Reset alles</button>
-    <button id="helpBtn" class="btn help-btn">HELP</button>
-    <button id="textBtn" class="btn text-btn">TEXT</button>
-  </div>
-
   <div class="groups" id="groups"></div>
 </main>
 
-<!-- STATUS POPUP -->
-<div id="statusOverlay" class="overlay">
+<!-- STATUS MODAL -->
+<div class="overlay" id="statusOverlay">
   <div class="modal">
-    <div class="modal-header">Kies status</div>
+    <h2>Status</h2>
     <div class="modal-grid">
-      <div class="choice" data-status="nieuw">Nieuw</div>
-      <div class="choice" data-status="drank">Drank</div>
-      <div class="choice" data-status="run">Run</div>
-      <div class="choice" data-status="koffie">Koffie</div>
-      <div class="choice" data-status="rekening">Rekening</div>
-      <div class="choice reset" data-status="reset">Reset</div>
+      <button data-status="nieuw">Nieuw</button>
+      <button data-status="drank">Drank</button>
+      <button data-status="run">Run</button>
+      <button data-status="koffie">Koffie</button>
+      <button data-status="rekening">Rekening</button>
+      <button data-reset>Reset nummer</button>
+      <button data-close>Sluiten</button>
     </div>
   </div>
 </div>
 
-<!-- TEXT MENU -->
-<div id="textOverlay" class="overlay">
+<!-- HELP -->
+<div class="overlay" id="helpOverlay">
   <div class="modal">
-    <div class="modal-header">Kies bericht</div>
+    <h2>HELP</h2>
     <div class="modal-grid">
-      <div class="choice" data-text="Boven uithalen">Boven uithalen</div>
-      <div class="choice" data-text="IJs brengen">IJs brengen</div>
-      <div class="choice" id="customText">Eigen invoer</div>
+      <button data-msg="Bar Beneden">Bar Beneden</button>
+      <button data-msg="Bar Boven">Bar Boven</button>
+      <button data-msg="Run">Run</button>
+      <button data-close>Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEXT -->
+<div class="overlay" id="textOverlay">
+  <div class="modal">
+    <h2>TEXT</h2>
+    <div class="modal-grid">
+      <button data-msg="Boven uithalen">Boven uithalen</button>
+      <button data-msg="IJs brengen">IJs brengen</button>
+      <button id="customText">Eigen invoer</button>
+      <button data-close>Sluiten</button>
     </div>
   </div>
 </div>
 
 <!-- CUSTOM TEXT -->
-<div id="customOverlay" class="overlay">
+<div class="overlay" id="customOverlay">
   <div class="modal">
-    <div class="modal-header">Eigen bericht</div>
+    <h2>Eigen bericht</h2>
+    <input id="customInput" placeholder="Typ bericht…">
     <div class="modal-grid">
-      <input id="customInput" placeholder="Typ bericht…" style="padding:10px;font-size:16px">
-      <div class="choice" id="sendCustom">Versturen</div>
+      <button id="sendCustom">Versturen</button>
+      <button data-close>Annuleren</button>
     </div>
   </div>
 </div>
 
-<!-- FULLSCREEN MESSAGE -->
-<div id="alertScreen" class="alert-screen">
-  <div id="alertText" class="alert-only"></div>
+<!-- ALERT -->
+<div class="alert-screen" id="alertScreen">
+  <div class="alert-only" id="alertText"></div>
 </div>
 
 <!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const sb = supabase.createClient(
+const supabase = supabase.createClient(
   "https://xiwdbvxnjcrdwjhmpjnf.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k"
 );
 
-const GROUPS=[
-  {label:"Beneden", zone:"bt", range:[1,13]},
-  {label:"Boven", zone:"boven", range:[20,58]}
-];
-
 const groupsEl=document.getElementById("groups");
-const statusOverlay=document.getElementById("statusOverlay");
-const textOverlay=document.getElementById("textOverlay");
-const customOverlay=document.getElementById("customOverlay");
 const alertScreen=document.getElementById("alertScreen");
 const alertText=document.getElementById("alertText");
 
-let activeTable=null;
+const GROUPS=[
+  {name:"Beneden",zone:"bt",from:1,to:13},
+  {name:"Boven",zone:"boven",from:20,to:58}
+];
 
-/* RENDER */
-function render(){
-  groupsEl.innerHTML="";
-  GROUPS.forEach(g=>{
-    const wrap=document.createElement("div");
-    wrap.className="group";
-    wrap.innerHTML=`<div class="group-label">${g.label}</div><div class="group-grid"></div>`;
-    const grid=wrap.querySelector(".group-grid");
-    grid.style.setProperty("--cols",Math.ceil(Math.sqrt(g.range[1]-g.range[0]+1)));
-    for(let i=g.range[0];i<=g.range[1];i++){
-      const t=document.createElement("div");
-      t.className="table";
-      t.innerHTML=`<div class="num">${i}</div><div class="note"></div><div class="timer"></div>`;
-      t.onclick=()=>{activeTable=t;statusOverlay.classList.add("open")};
-      grid.appendChild(t);
-    }
-    groupsEl.appendChild(wrap);
-  });
-}
-render();
-
-/* STATUS */
-document.querySelectorAll(".choice[data-status]").forEach(c=>{
-  c.onclick=()=>{
-    if(!activeTable)return;
-    const s=c.dataset.status;
-    activeTable.className="table";
-    activeTable.removeAttribute("data-status");
-    if(s!=="reset"){
-      activeTable.dataset.status=s;
-      activeTable.classList.add("status-"+s);
-      if(s==="nieuw")activeTable.querySelector(".num").classList.add("flagged");
-    }
-    statusOverlay.classList.remove("open");
-  };
-});
-
-/* TEXT */
-document.getElementById("textBtn").onclick=()=>textOverlay.classList.add("open");
-textOverlay.querySelectorAll("[data-text]").forEach(b=>{
-  b.onclick=()=>broadcast(b.dataset.text);
-});
-document.getElementById("customText").onclick=()=>{
-  textOverlay.classList.remove("open");
-  customOverlay.classList.add("open");
-};
-document.getElementById("sendCustom").onclick=()=>{
-  broadcast(document.getElementById("customInput").value);
-};
-
-/* BROADCAST */
-function broadcast(msg){
-  if(!msg)return;
+function showAlert(msg){
   alertText.textContent=msg;
   alertScreen.classList.add("show");
-  setTimeout(()=>alertScreen.classList.remove("show"),6000);
-  alertScreen.onclick=()=>alertScreen.classList.remove("show");
+  const close=()=>alertScreen.classList.remove("show");
+  alertScreen.onclick=close;
+  setTimeout(close,6000);
 }
+
+/* Realtime broadcast */
+supabase.channel("help_events")
+.on("postgres_changes",{event:"INSERT",schema:"public",table:"help_events"},p=>{
+  if(p.new?.kind) showAlert(p.new.kind);
+}).subscribe();
+
+/* HELP & TEXT */
+document.querySelectorAll("[data-msg]").forEach(b=>{
+  b.onclick=async()=>{
+    const msg=b.dataset.msg;
+    await supabase.from("help_events").insert({kind:msg});
+    showAlert(msg);
+    closeAll();
+  }
+});
+
+/* Custom */
+document.getElementById("sendCustom").onclick=async()=>{
+  const v=document.getElementById("customInput").value.trim();
+  if(!v) return;
+  await supabase.from("help_events").insert({kind:v});
+  showAlert(v);
+  closeAll();
+};
+
+/* Overlay controls */
+function closeAll(){document.querySelectorAll(".overlay").forEach(o=>o.classList.remove("show"))}
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeAll);
+document.getElementById("helpBtn").onclick=()=>document.getElementById("helpOverlay").classList.add("show");
+document.getElementById("textBtn").onclick=()=>document.getElementById("textOverlay").classList.add("show");
+document.getElementById("customText").onclick=()=>{
+  closeAll();
+  document.getElementById("customOverlay").classList.add("show");
+};
 </script>
+
 </body>
 </html>
