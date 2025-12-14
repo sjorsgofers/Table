@@ -1,331 +1,648 @@
 <!doctype html>
 <html lang="nl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Tafeloverzicht</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Tafels — Beneden + Boven</title>
 <style>
-:root{
-  --bg:#f6f7f9;
-  --card:#ffffff;
-  --border:#e5e7eb;
-  --text:#111827;
-  --nieuw:#ef4444;
-  --drank:#f59e0b;
-  --run:#10b981;
-  --koffie:#7c3aed;
-  --rekening:#0ea5e9;
-  --gap:8px;
-  --tile:80px;
-}
+  :root{
+    --bg:#f6f7f9; --card:#fff; --text:#111827; --muted:#6b7280;
+    --nieuw:#ef4444; --drank:#f59e0b; --run:#10b981; --koffie:#7c3aed; --rekening:#0ea5e9;
+    --soft:#f1f5f9; --border:#e5e7eb; --label:#eef2f7;
+    --gap:8px; --tile:80px; /* wordt dynamisch gezet in JS */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex; flex-direction:column; min-height:100vh;
+  }
+  header{
+    background:var(--card); border-bottom:1px solid var(--border);
+    padding:10px 14px; display:flex; align-items:center; gap:12px; flex:0 0 auto;
+  }
+  .title{font-weight:800; flex:1; font-size:clamp(16px,3vw,20px)}
+  main{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:10px; padding:10px 14px 14px}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .btn,.help-btn{
+    appearance:none; border:1px solid var(--border); background:#fff; color:#111827;
+    padding:7px 11px; border-radius:10px; cursor:pointer; font-weight:600;
+    font-size:clamp(12px,2.4vw,14px)
+  }
+  .help-btn{border:2px solid var(--nieuw); color:var(--nieuw); font-weight:900; letter-spacing:1px}
+  .text-btn{border:2px solid #111827; color:#111827; font-weight:900; letter-spacing:1px}
 
-*{box-sizing:border-box}
-html,body{height:100%;margin:0}
+  .legend{display:flex; gap:12px; flex-wrap:wrap; align-items:center; font-size:clamp(11px,2.5vw,14px); color:#6b7280}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px}
+  .dot.leeg{background:var(--soft);border:1px solid var(--border)}
+  .dot.nieuw{background:var(--nieuw)} .dot.drank{background:var(--drank)} .dot.run{background:var(--run)} .dot.koffie{background:var(--koffie)} .dot.rekening{background:var(--rekening)}
 
-body{
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  background:var(--bg);
-  display:flex;
-  flex-direction:column;
-}
+  /* Layout: alles moet passen, geen scroll */
+  .groups{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:12px; overflow:hidden}
+  .group{display:flex; flex-direction:column; gap:8px; min-height:0}
+  .group-label{
+    background:var(--label); border:1px solid var(--border); color:#111827;
+    border-radius:10px; padding:7px 10px; font-weight:900; letter-spacing:.3px; font-size:clamp(13px,2.2vw,16px);
+    flex:0 0 auto;
+  }
+  .group-grid{
+    --cols: 5;
+    display:grid; grid-auto-rows:var(--tile);
+    grid-template-columns:repeat(var(--cols), var(--tile));
+    gap:var(--gap);
+    place-content:start center;
+    flex:1 1 auto; min-height:0; overflow:hidden;
+  }
 
-/* HEADER */
-header{
-  background:var(--card);
-  border-bottom:1px solid var(--border);
-  padding:10px 14px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-header h1{
-  flex:1;
-  font-size:18px;
-  margin:0;
-  font-weight:800;
-}
+  .table{
+    width:var(--tile); height:var(--tile);
+    border-radius:12px; background:var(--card); border:1px solid var(--border);
+    display:grid; grid-template-rows:auto 1fr auto; align-items:center; justify-items:center; gap:4px;
+    cursor:pointer; position:relative; user-select:none;
+    font-size:calc(var(--tile)*0.20);
+  }
+  .num{line-height:1; color:var(--text); font-weight:800}
+  .num.num-flagged{color:var(--nieuw)}
+  .note{
+    font-size:calc(var(--tile)*0.14);
+    font-weight:600; color:#111827; text-align:center; line-height:1.2;
+    max-width:100%; max-height:2.4em; overflow:hidden; text-overflow:ellipsis;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .timer{
+    position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
+    font-size:calc(var(--tile)*0.14); font-weight:700; color:#475569; pointer-events:none;
+  }
 
-/* TOOLBAR */
-.toolbar{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-button{
-  border:1px solid var(--border);
-  background:#fff;
-  padding:8px 12px;
-  border-radius:10px;
-  font-weight:700;
-  cursor:pointer;
-}
-button.help{border:2px solid var(--nieuw); color:var(--nieuw)}
-button.text{border:2px solid #111}
+  .table[data-status]{color:#fff; border-color:transparent}
+  .table[data-status] .num{color:#fff!important}
+  .table[data-status] .note{color:#fff}
+  .table.status-nieuw{background:var(--nieuw)}
+  .table.status-drank{background:var(--drank)}
+  .table.status-run{background:var(--run)}
+  .table.status-koffie{background:var(--koffie)}
+  .table.status-rekening{background:var(--rekening)}
 
-/* MAIN */
-main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:10px;
-  overflow:hidden;
-}
+  /* Generic overlay/modal */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647}
+  .overlay.open{display:flex}
+  .modal{width:100%; max-width:480px; background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.35); border:1px solid var(--border)}
+  .modal-header{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:800}
+  .modal-grid{padding:14px; display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .choice{display:flex; align-items:center; gap:10px; border-radius:10px; padding:10px; cursor:pointer; border:1px solid var(--border); background:#fff; font-weight:800; justify-content:center; color:#111827}
+  .choice .swatch{width:16px; height:16px; border-radius:4px}
+  .swatch.nieuw{background:var(--nieuw)} .swatch.drank{background:var(--drank)} .swatch.run{background:var(--run)} .swatch.koffie{background:var(--koffie)} .swatch.rekening{background:var(--rekening)}
+  .choice.reset{border-color:#9ca3af; color:#374151}
+  .modal-footer{padding:12px 14px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px}
+  .link{background:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:800; color:#111827}
+  .link.primary{color:#fff; background:#2563eb; border-color:#2563eb}
+  .danger{border-color:#ef4444; color:#ef4444}
 
-/* GROUPS */
-.groups{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  overflow:hidden;
-}
-.group{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.group-label{
-  background:#eef2f7;
-  border:1px solid var(--border);
-  padding:6px 10px;
-  border-radius:10px;
-  font-weight:900;
-}
-.group-grid{
-  display:grid;
-  gap:var(--gap);
-  grid-template-columns:repeat(var(--cols),var(--tile));
-  justify-content:center;
-}
+  /* Notitie editor */
+  .note-editor{display:none; padding:14px; border-top:1px solid var(--border)}
+  .note-editor.open{display:block}
+  .note-editor textarea{width:100%; min-height:80px; border:1px solid var(--border); border-radius:10px; padding:10px; font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; resize:vertical}
+  .note-actions{margin-top:10px; display:flex; gap:8px; justify-content:flex-end}
 
-/* TABLE */
-.table{
-  width:var(--tile);
-  height:var(--tile);
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  place-items:center;
-  position:relative;
-  font-weight:800;
-}
-.table[data-status]{color:#fff;border:none}
-.table.nieuw{background:var(--nieuw)}
-.table.drank{background:var(--drank)}
-.table.run{background:var(--run)}
-.table.koffie{background:var(--koffie)}
-.table.rekening{background:var(--rekening)}
+  /* HELP + TEXT overlay menus */
+  .menu-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647}
+  .menu-overlay.open{display:flex}
+  .menu-modal{width:100%; max-width:420px; background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .menu-header{padding:14px 16px; font-weight:1000; border-bottom:1px solid var(--border)}
+  .menu-header.help{color:#ef4444}
+  .menu-header.text{color:#111827}
+  .menu-grid{padding:14px; display:grid; gap:10px}
+  .menu-opt{padding:14px; font-weight:900; border:2px solid #111827; color:#111827; background:#fff; border-radius:12px; cursor:pointer; text-align:center}
+  .menu-opt.help{border-color:#ef4444; color:#ef4444}
+  .menu-opt.cancel{border-color:#9ca3af; color:#374151}
 
-.num{font-size:calc(var(--tile)*0.22)}
-.num.flag{color:var(--nieuw)}
-.table[data-status] .num{color:#fff}
+  /* Eigen invoer modal */
+  .input-wrap{padding:14px; display:grid; gap:10px}
+  .input-wrap input{
+    width:100%;
+    padding:12px 12px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    font:16px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  }
+  .input-hint{font-size:12px; color:#6b7280}
 
-.note{
-  font-size:calc(var(--tile)*0.13);
-  text-align:center;
-  padding:0 4px;
-}
-.timer{
-  position:absolute;
-  bottom:6px;
-  font-size:calc(var(--tile)*0.13);
-}
-
-/* OVERLAYS */
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-.overlay.show{display:flex}
-
-.modal{
-  background:#fff;
-  border-radius:14px;
-  width:90%;
-  max-width:420px;
-  padding:14px;
-}
-.modal h2{
-  margin:0 0 10px;
-  font-size:18px;
-}
-.modal-grid{
-  display:grid;
-  gap:10px;
-}
-.modal-grid button{width:100%}
-
-/* ALERT SCREEN */
-.alert-screen{
-  position:fixed;
-  inset:0;
-  background:#fff;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:10000;
-}
-.alert-screen.show{display:flex}
-.alert-only{
-  font-size:clamp(40px,10vw,96px);
-  font-weight:1000;
-  text-align:center;
-  padding:20px;
-}
-
-/* INPUT */
-input,textarea{
-  width:100%;
-  padding:10px;
-  font-size:16px;
-}
+  /* Fullscreen message screen */
+  .alert-screen{position:fixed; inset:0; background:#fff; color:#000; display:none; align-items:center; justify-content:center; flex-direction:column; z-index:2147483647; text-align:center; padding:24px}
+  .alert-screen.show{display:flex}
+  .alert-title{font-size:clamp(30px,8vw,64px); line-height:1; font-weight:1000}
+  .alert-sub{font-size:clamp(18px,5vw,36px); font-weight:800; margin-top:14px; white-space:pre-wrap; word-break:break-word; max-width:min(900px, 92vw)}
 </style>
 </head>
-
 <body>
-
 <header>
-  <h1>Tafeloverzicht</h1>
-  <div class="toolbar">
-    <button id="resetAll">Reset</button>
-    <button class="help" id="helpBtn">HELP</button>
-    <button class="text" id="textBtn">TEXT</button>
-  </div>
+  <div class="title">Tafels — Beneden + Boven</div>
 </header>
-
 <main>
+  <div class="toolbar">
+    <button class="btn" id="resetAll">Reset alles</button>
+    <button id="helpBtn" class="help-btn">HELP</button>
+    <button id="textBtn" class="btn text-btn">TEXT</button>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot leeg"></span>Leeg</span>
+    <span><span class="dot nieuw"></span>Nieuw</span>
+    <span><span class="dot drank"></span>Drank</span>
+    <span><span class="dot run"></span>Run</span>
+    <span><span class="dot koffie"></span>Koffie</span>
+    <span><span class="dot rekening"></span>Rekening</span>
+  </div>
+
   <div class="groups" id="groups"></div>
 </main>
 
-<!-- STATUS MODAL -->
-<div class="overlay" id="statusOverlay">
+<!-- Status/Notitie Modal -->
+<div id="overlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
-    <h2>Status</h2>
-    <div class="modal-grid">
-      <button data-status="nieuw">Nieuw</button>
-      <button data-status="drank">Drank</button>
-      <button data-status="run">Run</button>
-      <button data-status="koffie">Koffie</button>
-      <button data-status="rekening">Rekening</button>
-      <button data-reset>Reset nummer</button>
-      <button data-close>Sluiten</button>
+    <div class="modal-header">Kies status</div>
+    <div class="modal-grid" id="statusChoices">
+      <button class="choice" data-choice="nieuw"><span class="swatch nieuw"></span>Nieuw</button>
+      <button class="choice" data-choice="drank"><span class="swatch drank"></span>Drank</button>
+      <button class="choice" data-choice="run"><span class="swatch run"></span>Run</button>
+      <button class="choice" data-choice="koffie"><span class="swatch koffie"></span>Koffie</button>
+      <button class="choice" data-choice="rekening"><span class="swatch rekening"></span>Rekening</button>
+      <button class="choice reset" data-choice="reset">Reset (tafelnummer)</button>
+    </div>
+
+    <div class="note-editor" id="noteEditor">
+      <textarea id="noteInput" placeholder="Notitie voor deze tafel..."></textarea>
+      <div class="note-actions">
+        <button class="link danger" id="deleteNote">Verwijder notitie</button>
+        <button class="link" id="cancelNote">Annuleren</button>
+        <button class="link primary" id="saveNote">Opslaan</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="link" id="cancelModal">Sluiten</button>
+      <button class="link primary" id="openNote">Notitie toevoegen/bewerken</button>
     </div>
   </div>
 </div>
 
-<!-- HELP -->
-<div class="overlay" id="helpOverlay">
-  <div class="modal">
-    <h2>HELP</h2>
-    <div class="modal-grid">
-      <button data-msg="Bar Beneden">Bar Beneden</button>
-      <button data-msg="Bar Boven">Bar Boven</button>
-      <button data-msg="Run">Run</button>
-      <button data-close>Sluiten</button>
+<!-- HELP Menu -->
+<div id="helpOverlay" class="menu-overlay" aria-modal="true" role="dialog">
+  <div class="menu-modal">
+    <div class="menu-header help">KIES HULPLOCATIE</div>
+    <div class="menu-grid">
+      <button class="menu-opt help" data-broadcast="Bar Beneden">Bar Beneden</button>
+      <button class="menu-opt help" data-broadcast="Bar Boven">Bar Boven</button>
+      <button class="menu-opt help" data-broadcast="Run">Run</button>
+      <button class="menu-opt cancel" id="helpCancel">Annuleren</button>
     </div>
   </div>
 </div>
 
-<!-- TEXT -->
-<div class="overlay" id="textOverlay">
-  <div class="modal">
-    <h2>TEXT</h2>
-    <div class="modal-grid">
-      <button data-msg="Boven uithalen">Boven uithalen</button>
-      <button data-msg="IJs brengen">IJs brengen</button>
-      <button id="customText">Eigen invoer</button>
-      <button data-close>Sluiten</button>
+<!-- TEXT Menu -->
+<div id="textOverlay" class="menu-overlay" aria-modal="true" role="dialog">
+  <div class="menu-modal">
+    <div class="menu-header text">KIES BERICHT</div>
+    <div class="menu-grid">
+      <button class="menu-opt" data-text="Boven uithalen">Boven uithalen</button>
+      <button class="menu-opt" data-text="IJs brengen">IJs brengen</button>
+      <button class="menu-opt" id="openCustomText">Eigen invoer</button>
+      <button class="menu-opt cancel" id="textCancel">Annuleren</button>
     </div>
   </div>
 </div>
 
-<!-- CUSTOM TEXT -->
-<div class="overlay" id="customOverlay">
+<!-- Eigen invoer modal -->
+<div id="customTextOverlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
-    <h2>Eigen bericht</h2>
-    <input id="customInput" placeholder="Typ bericht…">
-    <div class="modal-grid">
-      <button id="sendCustom">Versturen</button>
-      <button data-close>Annuleren</button>
+    <div class="modal-header">Eigen bericht</div>
+    <div class="input-wrap">
+      <input id="customTextInput" type="text" maxlength="80" placeholder="Typ een bericht (max 80 tekens)..." />
+      <div class="input-hint">Dit bericht wordt 6 sec. op alle apparaten getoond en verdwijnt direct bij 1 tik.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="link" id="customTextClose">Sluiten</button>
+      <button class="link primary" id="customTextSend">Versturen</button>
     </div>
   </div>
 </div>
 
-<!-- ALERT -->
-<div class="alert-screen" id="alertScreen">
-  <div class="alert-only" id="alertText"></div>
+<!-- Fullscreen message screen -->
+<div id="alertScreen" class="alert-screen" aria-live="assertive" aria-atomic="true">
+  <div class="alert-title">Assistentie gevraagd</div>
+  <div id="alertSub" class="alert-sub"></div>
 </div>
 
-<!-- SUPABASE -->
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const supabase = supabase.createClient(
-  "https://xiwdbvxnjcrdwjhmpjnf.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k"
-);
+/* ===== Supabase init ===== */
+const SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const groupsEl=document.getElementById("groups");
-const alertScreen=document.getElementById("alertScreen");
-const alertText=document.getElementById("alertText");
-
-const GROUPS=[
-  {name:"Beneden",zone:"bt",from:1,to:13},
-  {name:"Boven",zone:"boven",from:20,to:58}
+/* ===== Tafels ===== */
+const RANGES_BENEDEN = [[1,13]];
+const RANGES_BOVEN   = [[20,58]];
+const GROUPS = [
+  { label:'Beneden', ranges:RANGES_BENEDEN, zone:'bt' },
+  { label:'Boven',   ranges:RANGES_BOVEN,   zone:'boven' }
 ];
+function expandRanges(r){ const out=[]; for(const [a,b] of r){ for(let i=a;i<=b;i++) out.push(i);} return out; }
+function zoneFor(n){
+  for(const [a,b] of RANGES_BENEDEN) if(n>=a && n<=b) return 'bt';
+  for(const [a,b] of RANGES_BOVEN)   if(n>=a && n<=b) return 'boven';
+  return 'bt';
+}
+const STATUS_CLASSES={ nieuw:"status-nieuw", drank:"status-drank", run:"status-run", koffie:"status-koffie", rekening:"status-rekening" };
 
-function showAlert(msg){
-  alertText.textContent=msg;
-  alertScreen.classList.add("show");
-  const close=()=>alertScreen.classList.remove("show");
-  alertScreen.onclick=close;
-  setTimeout(close,6000);
+/* ===== Elements ===== */
+const groupsEl = document.getElementById('groups');
+const overlay=document.getElementById('overlay');
+const cancelBtn=document.getElementById('cancelModal');
+const openNoteBtn=document.getElementById('openNote');
+const statusChoices=document.getElementById('statusChoices');
+const noteEditor=document.getElementById('noteEditor');
+const noteInput=document.getElementById('noteInput');
+const saveNoteBtn=document.getElementById('saveNote');
+const deleteNoteBtn=document.getElementById('deleteNote');
+const cancelNoteBtn=document.getElementById('cancelNote');
+const choiceBtns=overlay.querySelectorAll('.choice');
+const resetAllBtn=document.getElementById('resetAll');
+
+const helpBtn=document.getElementById('helpBtn');
+const helpOverlay=document.getElementById('helpOverlay');
+const helpCancel=document.getElementById('helpCancel');
+
+const textBtn=document.getElementById('textBtn');
+const textOverlay=document.getElementById('textOverlay');
+const textCancel=document.getElementById('textCancel');
+const openCustomText=document.getElementById('openCustomText');
+
+const customTextOverlay=document.getElementById('customTextOverlay');
+const customTextInput=document.getElementById('customTextInput');
+const customTextSend=document.getElementById('customTextSend');
+const customTextClose=document.getElementById('customTextClose');
+
+const alertScreen=document.getElementById('alertScreen');
+const alertSub=document.getElementById('alertSub');
+
+/* ===== State ===== */
+let rows = new Map();
+let timerInterval=null;
+let pendingTableEl=null;
+let tableChannel=null, eventsChannel=null;
+let lastRealtimeAt=0;
+
+/* ===== Data IO ===== */
+function keyOf(zone, n){ return `${zone}-${n}`; }
+async function fetchAll(){
+  const { data, error } = await sb.from('tables_status').select('*');
+  if(error){ console.error('fetchAll error', error); return; }
+  rows = new Map(data.map(r=>[keyOf(r.zone,r.table_num), r]));
+}
+async function upsertByNumber(n, patch){
+  const zone = zoneFor(n);
+  const prev = rows.get(keyOf(zone,n)) || { zone, table_num:n };
+  const payload = { status:null, status_started:null, note:null, num_marked:false, ...prev, ...patch, updated_at:new Date().toISOString() };
+  const { data, error } = await sb.from('tables_status').upsert(payload).select().single();
+  if(error){ console.error('upsert error', error); return prev; }
+  rows.set(keyOf(zone,n), data);
+  return data;
 }
 
-/* Realtime broadcast */
-supabase.channel("help_events")
-.on("postgres_changes",{event:"INSERT",schema:"public",table:"help_events"},p=>{
-  if(p.new?.kind) showAlert(p.new.kind);
-}).subscribe();
+/* ===== Helpers ===== */
+function ensureChild(cell, selector, className){
+  let el = cell.querySelector(selector);
+  if(!el){ el = document.createElement('div'); el.className = className; cell.appendChild(el); }
+  return el;
+}
+function setNote(cell, text){ ensureChild(cell,'.note','note').textContent = text || ''; }
+function setTimer(cell, text){ ensureChild(cell,'.timer','timer').textContent = text || ''; }
+function setNumFlag(cell, flagged){
+  const numEl = cell.querySelector('.num') || ensureChild(cell,'.num','num');
+  numEl.classList.toggle('num-flagged', !!flagged);
+}
+function applyStatusClass(cell,status){
+  cell.classList.remove(...Object.values(STATUS_CLASSES));
+  if(status){ cell.classList.add(STATUS_CLASSES[status]); cell.setAttribute('data-status',status); }
+  else { cell.removeAttribute('data-status'); }
+}
+function fmtElapsed(ms){
+  if(ms<0||!isFinite(ms))return '';
+  const total = Math.floor(ms/1000), s=total%60, m=Math.floor(total/60)%60, h=Math.floor(total/3600);
+  const pad=n=>n<10?'0'+n:''+n;
+  return h?`${h}:${pad(m)}:${pad(s)}`:`${m}:${pad(s)}`;
+}
 
-/* HELP & TEXT */
-document.querySelectorAll("[data-msg]").forEach(b=>{
-  b.onclick=async()=>{
-    const msg=b.dataset.msg;
-    await supabase.from("help_events").insert({kind:msg});
-    showAlert(msg);
-    closeAll();
+/* ===== Render ===== */
+function render(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+  groupsEl.innerHTML = '';
+
+  for(const group of GROUPS){
+    const nums = expandRanges(group.ranges);
+
+    const wrap = document.createElement('section'); wrap.className='group';
+    const label = document.createElement('div'); label.className='group-label'; label.textContent=group.label;
+    const grid = document.createElement('div'); grid.className='group-grid'; grid.dataset.zone = group.zone;
+
+    wrap.appendChild(label); wrap.appendChild(grid);
+    groupsEl.appendChild(wrap);
+
+    for(const n of nums){
+      const r = rows.get(keyOf(group.zone,n)) || {};
+      const cell=document.createElement('button');
+      cell.className='table'; cell.type='button'; cell.dataset.num=n; cell.dataset.zone=group.zone;
+
+      const numEl=document.createElement('div'); numEl.className='num'; numEl.textContent=n; cell.appendChild(numEl);
+      const mid=document.createElement('div'); mid.style.width='1px'; mid.style.height='1px'; cell.appendChild(mid);
+      const noteEl=document.createElement('div'); noteEl.className='note'; cell.appendChild(noteEl);
+      const timerEl=document.createElement('div'); timerEl.className='timer'; cell.appendChild(timerEl);
+
+      applyStatusClass(cell, r.status || null);
+      setNote(cell, r.note || '');
+      setNumFlag(cell, !!r.num_marked);
+
+      cell.addEventListener('click', async ()=>{
+        const cur = rows.get(keyOf(group.zone,n)) || {};
+        const hasStatus = !!cur.status || cell.hasAttribute('data-status');
+        if(hasStatus){
+          const keepFlag = !!cur.num_marked;
+          await upsertByNumber(n, { status:null, status_started:null, num_marked: keepFlag });
+          applyStatusClass(cell, null);
+          setTimer(cell,'');
+          setNumFlag(cell, keepFlag);
+          return;
+        }
+        pendingTableEl = cell;
+        noteInput.value = cur.note || '';
+        showChoicesPane();
+        overlay.classList.add('open');
+      });
+
+      grid.appendChild(cell);
+    }
   }
+
+  function tick(){
+    const now = Date.now();
+    document.querySelectorAll('.table').forEach(cell=>{
+      const n = Number(cell.dataset.num);
+      const z = cell.dataset.zone;
+      const r = rows.get(keyOf(z, n));
+      if(r && r.status && r.status_started){
+        setTimer(cell, fmtElapsed(now - Date.parse(r.status_started)));
+      } else {
+        setTimer(cell, '');
+      }
+    });
+  }
+  tick();
+  timerInterval = setInterval(tick, 1000);
+
+  layoutToFit();
+}
+
+/* ===== Popup panes ===== */
+function showChoicesPane(){ statusChoices.style.display='grid'; noteEditor.classList.remove('open'); }
+function showNotePane(){ statusChoices.style.display='none'; noteEditor.classList.add('open'); }
+
+/* ===== Status keuze ===== */
+choiceBtns.forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    if(!pendingTableEl) return;
+    const choice = btn.dataset.choice;
+    const n = Number(pendingTableEl.dataset.num);
+
+    if(choice === 'reset'){
+      await upsertByNumber(n, { num_marked:false });
+      setNumFlag(pendingTableEl, false);
+      overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
+      return;
+    }
+
+    const patch = { status:choice, status_started:new Date().toISOString() };
+    if(choice === 'nieuw'){ patch.num_marked = true; }
+    await upsertByNumber(n, patch);
+    applyStatusClass(pendingTableEl, choice);
+    if(choice === 'nieuw'){ setNumFlag(pendingTableEl, true); }
+    overlay.classList.remove('open'); pendingTableEl=null;
+  });
 });
 
-/* Custom */
-document.getElementById("sendCustom").onclick=async()=>{
-  const v=document.getElementById("customInput").value.trim();
-  if(!v) return;
-  await supabase.from("help_events").insert({kind:v});
-  showAlert(v);
-  closeAll();
-};
+/* ===== Notities ===== */
+openNoteBtn.addEventListener('click',()=>{ if(pendingTableEl) showNotePane(); });
+saveNoteBtn.addEventListener('click', async ()=>{
+  if(!pendingTableEl) return;
+  const n = Number(pendingTableEl.dataset.num);
+  const text = noteInput.value.trim();
+  await upsertByNumber(n, { note: text || null });
+  pendingTableEl.querySelector('.note').textContent = text;
+  overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
+});
+deleteNoteBtn.addEventListener('click', async ()=>{
+  if(!pendingTableEl) return;
+  const n = Number(pendingTableEl.dataset.num);
+  await upsertByNumber(n, { note: null });
+  pendingTableEl.querySelector('.note').textContent = '';
+  overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
+});
+cancelNoteBtn.addEventListener('click',()=>{ showChoicesPane(); });
 
-/* Overlay controls */
-function closeAll(){document.querySelectorAll(".overlay").forEach(o=>o.classList.remove("show"))}
-document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeAll);
-document.getElementById("helpBtn").onclick=()=>document.getElementById("helpOverlay").classList.add("show");
-document.getElementById("textBtn").onclick=()=>document.getElementById("textOverlay").classList.add("show");
-document.getElementById("customText").onclick=()=>{
-  closeAll();
-  document.getElementById("customOverlay").classList.add("show");
-};
+/* ===== Overlay close ===== */
+cancelBtn.addEventListener('click',()=>{ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); });
+overlay.addEventListener('click',e=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); }});
+
+/* ===== Reset ===== */
+async function fullResetAll(){
+  for(const g of GROUPS){
+    for(const n of expandRanges(g.ranges)){
+      const r = rows.get(keyOf(g.zone,n)); if(!r) continue;
+      await upsertByNumber(n, { status:null, status_started:null, num_marked:false });
+    }
+  }
+  render();
+}
+resetAllBtn.addEventListener('click', fullResetAll);
+
+/* Auto reset om 02:00 */
+async function autoDailyResetCheck(){
+  const now = new Date(); const hh = now.getHours(); const mm = now.getMinutes();
+  const todayKey = now.toISOString().slice(0,10); const last = localStorage.getItem('last_auto_reset');
+  if(hh === 2 && mm < 5 && last !== todayKey){ await fullResetAll(); localStorage.setItem('last_auto_reset', todayKey); }
+}
+setInterval(autoDailyResetCheck, 60_000);
+
+/* ===== Fullscreen message (HELP + TEXT) ===== */
+function showBroadcast(message){
+  alertSub.textContent = message;
+  alertScreen.classList.add('show');
+
+  const close = ()=>{
+    alertScreen.classList.remove('show');
+    alertScreen.removeEventListener('click', close);
+  };
+  alertScreen.addEventListener('click', close);
+  setTimeout(close, 6000);
+}
+
+/* ✅ Eén centrale broadcast naar Supabase */
+async function sendBroadcast(message){
+  const msg = (message || '').toString().trim();
+  if(!msg) return;
+  const { error } = await sb.from('help_events').insert({ kind: msg }); // hergebruik bestaande tabel
+  if(error){ console.error('broadcast insert error', error); }
+}
+
+/* Subscribe op broadcasts */
+function subscribeBroadcasts(){
+  if(eventsChannel){ sb.removeChannel(eventsChannel); }
+  eventsChannel = sb.channel('help_events:all')
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'help_events' }, payload=>{
+      const row = payload?.new;
+      if(row?.kind) showBroadcast(row.kind);
+    })
+    .subscribe();
+}
+
+/* ===== Realtime tafels ===== */
+function subscribeRealtimeTables(){
+  if(tableChannel){ sb.removeChannel(tableChannel); }
+  tableChannel = sb.channel('tables_status:all')
+    .on('postgres_changes', { event:'*', schema:'public', table:'tables_status' }, payload=>{
+      const row = payload.new || payload.old; if(!row) return;
+      rows.set(keyOf(row.zone,row.table_num), payload.new || row);
+      const cell = document.querySelector(`.table[data-zone="${row.zone}"][data-num="${row.table_num}"]`);
+      if(cell){
+        const r = rows.get(keyOf(row.zone,row.table_num));
+        applyStatusClass(cell, r.status || null);
+        setNote(cell, r.note || '');
+        setNumFlag(cell, !!r.num_marked);
+        if(!(r && r.status && r.status_started)) setTimer(cell,'');
+      }
+    })
+    .subscribe();
+}
+setInterval(async ()=>{
+  if(Date.now() - lastRealtimeAt > 7000){
+    const before = JSON.stringify([...rows.entries()]);
+    await fetchAll();
+    const after = JSON.stringify([...rows.entries()]);
+    if(before !== after) render();
+  }
+}, 6000);
+
+/* ===== HELP UI ===== */
+helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
+helpOverlay.addEventListener('click', e=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
+helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
+helpOverlay.querySelectorAll('[data-broadcast]').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    const msg = btn.dataset.broadcast;
+    helpOverlay.classList.remove('open');
+    await sendBroadcast(msg);
+    showBroadcast(msg);
+  });
+});
+
+/* ===== TEXT UI ===== */
+textBtn.addEventListener('click', ()=> textOverlay.classList.add('open'));
+textOverlay.addEventListener('click', e=>{ if(e.target===textOverlay) textOverlay.classList.remove('open'); });
+textCancel.addEventListener('click', ()=> textOverlay.classList.remove('open'));
+
+/* Presets */
+textOverlay.querySelectorAll('[data-text]').forEach(btn=>{
+  btn.addEventListener('click', async ()=>{
+    const msg = btn.dataset.text;
+    textOverlay.classList.remove('open');
+    await sendBroadcast(msg);
+    showBroadcast(msg);
+  });
+});
+
+/* Eigen invoer */
+openCustomText.addEventListener('click', ()=>{
+  textOverlay.classList.remove('open');
+  customTextInput.value = '';
+  customTextOverlay.classList.add('open');
+  setTimeout(()=>customTextInput.focus(), 50);
+});
+customTextClose.addEventListener('click', ()=> customTextOverlay.classList.remove('open'));
+customTextOverlay.addEventListener('click', e=>{ if(e.target===customTextOverlay) customTextOverlay.classList.remove('open'); });
+
+async function sendCustom(){
+  const msg = customTextInput.value.trim();
+  if(!msg) return;
+  customTextOverlay.classList.remove('open');
+  await sendBroadcast(msg);
+  showBroadcast(msg);
+}
+customTextSend.addEventListener('click', sendCustom);
+customTextInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); sendCustom(); }});
+
+/* ===== ✅ Dynamische layout zodat ALLES past ===== */
+function layoutToFit(){
+  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
+  const groupsRect = groupsEl.getBoundingClientRect();
+  const availW = Math.floor(groupsRect.width);
+  const availH = Math.floor(groupsRect.height);
+
+  const LABEL_H = 34;
+  const BETWEEN_GROUPS = 12;
+
+  const N_b = expandRanges(RANGES_BENEDEN).length; // 13
+  const N_t = expandRanges(RANGES_BOVEN).length;   // 39
+
+  let best = null;
+
+  for(let cb=1; cb<=N_b; cb++){
+    const rb = Math.ceil(N_b / cb);
+    const tileW_b = Math.floor( (availW - (cb-1)*gap) / cb );
+
+    for(let ct=1; ct<=N_t; ct++){
+      const rt = Math.ceil(N_t / ct);
+      const tileW_t = Math.floor( (availW - (ct-1)*gap) / ct );
+
+      const totalRows = rb + rt;
+      const totalGapsV = (rb-1 + rt-1) * gap + BETWEEN_GROUPS;
+      const labelsH = 2 * (LABEL_H + 8);
+
+      const tileH_limit = Math.floor( (availH - labelsH - totalGapsV) / totalRows );
+      const tileW_limit = Math.min(tileW_b, tileW_t);
+      const tile = Math.max(0, Math.min(tileH_limit, tileW_limit));
+
+      if(!best || tile > best.tile){
+        best = { cb, ct, rb, rt, tile };
+      }
+    }
+  }
+
+  if(!best || best.tile < 22){ best = best || {cb:5,ct:8,tile:22}; best.tile = 22; }
+
+  document.documentElement.style.setProperty('--tile', best.tile+'px');
+
+  document.querySelectorAll('.group-grid').forEach(grid=>{
+    const zone = grid.dataset.zone;
+    grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
+  });
+}
+
+let rAFid=null;
+function scheduleLayout(){ if(rAFid) cancelAnimationFrame(rAFid); rAFid = requestAnimationFrame(()=>{ rAFid=null; layoutToFit(); }); }
+window.addEventListener('resize', scheduleLayout);
+window.addEventListener('orientationchange', ()=>setTimeout(layoutToFit, 50));
+
+/* ===== Init ===== */
+(async function(){
+  await fetchAll();
+  render();
+  subscribeRealtimeTables();
+  subscribeBroadcasts();
+  autoDailyResetCheck();
+  layoutToFit();
+})();
 </script>
-
 </body>
 </html>
