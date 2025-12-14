@@ -3,646 +3,346 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Tafels — Beneden + Boven</title>
+<title>Tafeloverzicht</title>
+
 <style>
-  :root{
-    --bg:#f6f7f9; --card:#fff; --text:#111827; --muted:#6b7280;
-    --nieuw:#ef4444; --drank:#f59e0b; --run:#10b981; --koffie:#7c3aed; --rekening:#0ea5e9;
-    --soft:#f1f5f9; --border:#e5e7eb; --label:#eef2f7;
-    --gap:8px; --tile:80px; /* wordt dynamisch gezet in JS */
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; background:var(--bg); color:var(--text);
-    font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    display:flex; flex-direction:column; min-height:100vh;
-  }
-  header{
-    background:var(--card); border-bottom:1px solid var(--border);
-    padding:10px 14px; display:flex; align-items:center; gap:12px; flex:0 0 auto;
-  }
-  .title{font-weight:800; flex:1; font-size:clamp(16px,3vw,20px)}
-  main{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:10px; padding:10px 14px 14px}
-  .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-  .btn,.help-btn{
-    appearance:none; border:1px solid var(--border); background:#fff; color:#111827;
-    padding:7px 11px; border-radius:10px; cursor:pointer; font-weight:600;
-    font-size:clamp(12px,2.4vw,14px)
-  }
-  .help-btn{border:2px solid var(--nieuw); color:var(--nieuw); font-weight:900; letter-spacing:1px}
-  .text-btn{border:2px solid #111827; color:#111827; font-weight:900; letter-spacing:1px}
+:root{
+  --bg:#f6f7f9;
+  --card:#ffffff;
+  --text:#111827;
+  --border:#e5e7eb;
 
-  .legend{display:flex; gap:12px; flex-wrap:wrap; align-items:center; font-size:clamp(11px,2.5vw,14px); color:#6b7280}
-  .dot{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px}
-  .dot.leeg{background:var(--soft);border:1px solid var(--border)}
-  .dot.nieuw{background:var(--nieuw)} .dot.drank{background:var(--drank)} .dot.run{background:var(--run)} .dot.koffie{background:var(--koffie)} .dot.rekening{background:var(--rekening)}
+  --nieuw:#ef4444;
+  --drank:#f59e0b;
+  --run:#10b981;
+  --koffie:#7c3aed;
+  --rekening:#0ea5e9;
 
-  /* Layout: alles moet passen, geen scroll */
-  .groups{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:12px; overflow:hidden}
-  .group{display:flex; flex-direction:column; gap:8px; min-height:0}
-  .group-label{
-    background:var(--label); border:1px solid var(--border); color:#111827;
-    border-radius:10px; padding:7px 10px; font-weight:900; letter-spacing:.3px; font-size:clamp(13px,2.2vw,16px);
-    flex:0 0 auto;
-  }
-  .group-grid{
-    --cols: 5;
-    display:grid; grid-auto-rows:var(--tile);
-    grid-template-columns:repeat(var(--cols), var(--tile));
-    gap:var(--gap);
-    place-content:start center;
-    flex:1 1 auto; min-height:0; overflow:hidden;
-  }
+  --gap:8px;
+  --tile:72px;
+}
 
-  .table{
-    width:var(--tile); height:var(--tile);
-    border-radius:12px; background:var(--card); border:1px solid var(--border);
-    display:grid; grid-template-rows:auto 1fr auto; align-items:center; justify-items:center; gap:4px;
-    cursor:pointer; position:relative; user-select:none;
-    font-size:calc(var(--tile)*0.20);
-  }
-  .num{line-height:1; color:var(--text); font-weight:800}
-  .num.num-flagged{color:var(--nieuw)}
-  .note{
-    font-size:calc(var(--tile)*0.14);
-    font-weight:600; color:#111827; text-align:center; line-height:1.2;
-    max-width:100%; max-height:2.4em; overflow:hidden; text-overflow:ellipsis;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-  }
-  .timer{
-    position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
-    font-size:calc(var(--tile)*0.14); font-weight:700; color:#475569; pointer-events:none;
-  }
+*{box-sizing:border-box}
+html,body{height:100%}
 
-  .table[data-status]{color:#fff; border-color:transparent}
-  .table[data-status] .num{color:#fff!important}
-  .table[data-status] .note{color:#fff}
-  .table.status-nieuw{background:var(--nieuw)}
-  .table.status-drank{background:var(--drank)}
-  .table.status-run{background:var(--run)}
-  .table.status-koffie{background:var(--koffie)}
-  .table.status-rekening{background:var(--rekening)}
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  display:flex;
+  flex-direction:column;
+}
 
-  /* Generic overlay/modal */
-  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647}
-  .overlay.open{display:flex}
-  .modal{width:100%; max-width:480px; background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.35); border:1px solid var(--border)}
-  .modal-header{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:800}
-  .modal-grid{padding:14px; display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
-  .choice{display:flex; align-items:center; gap:10px; border-radius:10px; padding:10px; cursor:pointer; border:1px solid var(--border); background:#fff; font-weight:800; justify-content:center; color:#111827}
-  .choice .swatch{width:16px; height:16px; border-radius:4px}
-  .swatch.nieuw{background:var(--nieuw)} .swatch.drank{background:var(--drank)} .swatch.run{background:var(--run)} .swatch.koffie{background:var(--koffie)} .swatch.rekening{background:var(--rekening)}
-  .choice.reset{border-color:#9ca3af; color:#374151}
-  .modal-footer{padding:12px 14px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px}
-  .link{background:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:800; color:#111827}
-  .link.primary{color:#fff; background:#2563eb; border-color:#2563eb}
-  .danger{border-color:#ef4444; color:#ef4444}
+/* HEADER */
+header{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+}
+header h1{
+  margin:0;
+  font-size:18px;
+  font-weight:900;
+  flex:1;
+}
 
-  /* Notitie editor */
-  .note-editor{display:none; padding:14px; border-top:1px solid var(--border)}
-  .note-editor.open{display:block}
-  .note-editor textarea{width:100%; min-height:80px; border:1px solid var(--border); border-radius:10px; padding:10px; font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; resize:vertical}
-  .note-actions{margin-top:10px; display:flex; gap:8px; justify-content:flex-end}
+/* MAIN */
+main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:10px 14px;
+  min-height:0;
+}
 
-  /* HELP + TEXT overlay menus */
-  .menu-overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:16px; z-index:2147483647}
-  .menu-overlay.open{display:flex}
-  .menu-modal{width:100%; max-width:420px; background:#fff; border:1px solid var(--border); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
-  .menu-header{padding:14px 16px; font-weight:1000; border-bottom:1px solid var(--border)}
-  .menu-header.help{color:#ef4444}
-  .menu-header.text{color:#111827}
-  .menu-grid{padding:14px; display:grid; gap:10px}
-  .menu-opt{padding:14px; font-weight:900; border:2px solid #111827; color:#111827; background:#fff; border-radius:12px; cursor:pointer; text-align:center}
-  .menu-opt.help{border-color:#ef4444; color:#ef4444}
-  .menu-opt.cancel{border-color:#9ca3af; color:#374151}
+/* TOOLBAR */
+.toolbar{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.btn{
+  border:1px solid var(--border);
+  background:#fff;
+  padding:6px 12px;
+  border-radius:10px;
+  font-weight:800;
+  cursor:pointer;
+}
+.help-btn{border:2px solid var(--nieuw); color:var(--nieuw)}
+.text-btn{border:2px solid #111; font-weight:900}
 
-  /* Eigen invoer modal */
-  .input-wrap{padding:14px; display:grid; gap:10px}
-  .input-wrap input{
-    width:100%;
-    padding:12px 12px;
-    border:1px solid var(--border);
-    border-radius:12px;
-    font:16px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  }
-  .input-hint{font-size:12px; color:#6b7280}
+/* GROUPS */
+.groups{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  overflow:hidden;
+}
+.group{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.group-label{
+  background:#eef2f7;
+  border:1px solid var(--border);
+  padding:6px 10px;
+  border-radius:10px;
+  font-weight:900;
+}
 
-  /* Fullscreen message screen */
-  .alert-screen{position:fixed; inset:0; background:#fff; color:#000; display:none; align-items:center; justify-content:center; flex-direction:column; z-index:2147483647; text-align:center; padding:24px}
-  .alert-screen.show{display:flex}
-  .alert-title{font-size:clamp(30px,8vw,64px); line-height:1; font-weight:1000}
-  .alert-sub{font-size:clamp(18px,5vw,36px); font-weight:800; margin-top:14px; white-space:pre-wrap; word-break:break-word; max-width:min(900px, 92vw)}
+/* GRID */
+.group-grid{
+  display:grid;
+  grid-template-columns:repeat(var(--cols), var(--tile));
+  grid-auto-rows:var(--tile);
+  gap:var(--gap);
+  justify-content:center;
+  flex:1;
+}
+
+/* TABLE */
+.table{
+  width:var(--tile);
+  height:var(--tile);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  align-items:center;
+  justify-items:center;
+  position:relative;
+  cursor:pointer;
+  font-weight:900;
+}
+.num{
+  font-size:calc(var(--tile)*0.22);
+}
+.num.flagged{color:var(--nieuw)}
+.note{
+  font-size:calc(var(--tile)*0.14);
+  text-align:center;
+  padding:0 4px;
+  line-height:1.1;
+}
+.timer{
+  position:absolute;
+  bottom:4px;
+  font-size:calc(var(--tile)*0.14);
+}
+
+/* STATUS COLORS */
+.table[data-status]{color:#fff; border:none}
+.table[data-status] .num{color:#fff}
+.table.status-nieuw{background:var(--nieuw)}
+.table.status-drank{background:var(--drank)}
+.table.status-run{background:var(--run)}
+.table.status-koffie{background:var(--koffie)}
+.table.status-rekening{background:var(--rekening)}
+
+/* MODALS */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.overlay.open{display:flex}
+.modal{
+  background:#fff;
+  border-radius:14px;
+  width:90%;
+  max-width:420px;
+  border:1px solid var(--border);
+}
+.modal-header{
+  padding:14px;
+  font-weight:900;
+  border-bottom:1px solid var(--border);
+}
+.modal-grid{
+  padding:14px;
+  display:grid;
+  gap:10px;
+}
+.choice{
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  font-weight:800;
+  cursor:pointer;
+}
+.choice.reset{border-color:#999}
+
+/* FULLSCREEN MESSAGE */
+.alert-screen{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:10000;
+}
+.alert-screen.show{display:flex}
+.alert-only{
+  font-size:clamp(36px, 9vw, 90px);
+  font-weight:1000;
+  text-align:center;
+  padding:20px;
+}
 </style>
 </head>
+
 <body>
+
 <header>
-  <div class="title">Tafels — Beneden + Boven</div>
+  <h1>Tafeloverzicht</h1>
 </header>
+
 <main>
   <div class="toolbar">
-    <button class="btn" id="resetAll">Reset alles</button>
-    <button id="helpBtn" class="help-btn">HELP</button>
+    <button id="resetAll" class="btn">Reset alles</button>
+    <button id="helpBtn" class="btn help-btn">HELP</button>
     <button id="textBtn" class="btn text-btn">TEXT</button>
-  </div>
-
-  <div class="legend">
-    <span><span class="dot leeg"></span>Leeg</span>
-    <span><span class="dot nieuw"></span>Nieuw</span>
-    <span><span class="dot drank"></span>Drank</span>
-    <span><span class="dot run"></span>Run</span>
-    <span><span class="dot koffie"></span>Koffie</span>
-    <span><span class="dot rekening"></span>Rekening</span>
   </div>
 
   <div class="groups" id="groups"></div>
 </main>
 
-<!-- Status/Notitie Modal -->
-<div id="overlay" class="overlay" aria-modal="true" role="dialog">
+<!-- STATUS POPUP -->
+<div id="statusOverlay" class="overlay">
   <div class="modal">
     <div class="modal-header">Kies status</div>
-    <div class="modal-grid" id="statusChoices">
-      <button class="choice" data-choice="nieuw"><span class="swatch nieuw"></span>Nieuw</button>
-      <button class="choice" data-choice="drank"><span class="swatch drank"></span>Drank</button>
-      <button class="choice" data-choice="run"><span class="swatch run"></span>Run</button>
-      <button class="choice" data-choice="koffie"><span class="swatch koffie"></span>Koffie</button>
-      <button class="choice" data-choice="rekening"><span class="swatch rekening"></span>Rekening</button>
-      <button class="choice reset" data-choice="reset">Reset (tafelnummer)</button>
-    </div>
-
-    <div class="note-editor" id="noteEditor">
-      <textarea id="noteInput" placeholder="Notitie voor deze tafel..."></textarea>
-      <div class="note-actions">
-        <button class="link danger" id="deleteNote">Verwijder notitie</button>
-        <button class="link" id="cancelNote">Annuleren</button>
-        <button class="link primary" id="saveNote">Opslaan</button>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="link" id="cancelModal">Sluiten</button>
-      <button class="link primary" id="openNote">Notitie toevoegen/bewerken</button>
+    <div class="modal-grid">
+      <div class="choice" data-status="nieuw">Nieuw</div>
+      <div class="choice" data-status="drank">Drank</div>
+      <div class="choice" data-status="run">Run</div>
+      <div class="choice" data-status="koffie">Koffie</div>
+      <div class="choice" data-status="rekening">Rekening</div>
+      <div class="choice reset" data-status="reset">Reset</div>
     </div>
   </div>
 </div>
 
-<!-- HELP Menu -->
-<div id="helpOverlay" class="menu-overlay" aria-modal="true" role="dialog">
-  <div class="menu-modal">
-    <div class="menu-header help">KIES HULPLOCATIE</div>
-    <div class="menu-grid">
-      <button class="menu-opt help" data-broadcast="Bar Beneden">Bar Beneden</button>
-      <button class="menu-opt help" data-broadcast="Bar Boven">Bar Boven</button>
-      <button class="menu-opt help" data-broadcast="Run">Run</button>
-      <button class="menu-opt cancel" id="helpCancel">Annuleren</button>
+<!-- TEXT MENU -->
+<div id="textOverlay" class="overlay">
+  <div class="modal">
+    <div class="modal-header">Kies bericht</div>
+    <div class="modal-grid">
+      <div class="choice" data-text="Boven uithalen">Boven uithalen</div>
+      <div class="choice" data-text="IJs brengen">IJs brengen</div>
+      <div class="choice" id="customText">Eigen invoer</div>
     </div>
   </div>
 </div>
 
-<!-- TEXT Menu -->
-<div id="textOverlay" class="menu-overlay" aria-modal="true" role="dialog">
-  <div class="menu-modal">
-    <div class="menu-header text">KIES BERICHT</div>
-    <div class="menu-grid">
-      <button class="menu-opt" data-text="Boven uithalen">Boven uithalen</button>
-      <button class="menu-opt" data-text="IJs brengen">IJs brengen</button>
-      <button class="menu-opt" id="openCustomText">Eigen invoer</button>
-      <button class="menu-opt cancel" id="textCancel">Annuleren</button>
-    </div>
-  </div>
-</div>
-
-<!-- Eigen invoer modal -->
-<div id="customTextOverlay" class="overlay" aria-modal="true" role="dialog">
+<!-- CUSTOM TEXT -->
+<div id="customOverlay" class="overlay">
   <div class="modal">
     <div class="modal-header">Eigen bericht</div>
-    <div class="input-wrap">
-      <input id="customTextInput" type="text" maxlength="80" placeholder="Typ een bericht (max 80 tekens)..." />
-      <div class="input-hint">Dit bericht wordt 6 sec. op alle apparaten getoond en verdwijnt direct bij 1 tik.</div>
-    </div>
-    <div class="modal-footer">
-      <button class="link" id="customTextClose">Sluiten</button>
-      <button class="link primary" id="customTextSend">Versturen</button>
+    <div class="modal-grid">
+      <input id="customInput" placeholder="Typ bericht…" style="padding:10px;font-size:16px">
+      <div class="choice" id="sendCustom">Versturen</div>
     </div>
   </div>
 </div>
 
-<!-- Fullscreen message screen -->
-<div id="alertScreen" class="alert-screen" aria-live="assertive" aria-atomic="true">
-  <div class="alert-title">Assistentie gevraagd</div>
-  <div id="alertSub" class="alert-sub"></div>
+<!-- FULLSCREEN MESSAGE -->
+<div id="alertScreen" class="alert-screen">
+  <div id="alertText" class="alert-only"></div>
 </div>
 
-<!-- Supabase -->
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== Supabase init ===== */
-const SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const sb = supabase.createClient(
+  "https://xiwdbvxnjcrdwjhmpjnf.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k"
+);
 
-/* ===== Tafels ===== */
-const RANGES_BENEDEN = [[1,13]];
-const RANGES_BOVEN   = [[20,58]];
-const GROUPS = [
-  { label:'Beneden', ranges:RANGES_BENEDEN, zone:'bt' },
-  { label:'Boven',   ranges:RANGES_BOVEN,   zone:'boven' }
+const GROUPS=[
+  {label:"Beneden", zone:"bt", range:[1,13]},
+  {label:"Boven", zone:"boven", range:[20,58]}
 ];
-function expandRanges(r){ const out=[]; for(const [a,b] of r){ for(let i=a;i<=b;i++) out.push(i);} return out; }
-function zoneFor(n){
-  for(const [a,b] of RANGES_BENEDEN) if(n>=a && n<=b) return 'bt';
-  for(const [a,b] of RANGES_BOVEN)   if(n>=a && n<=b) return 'boven';
-  return 'bt';
-}
-const STATUS_CLASSES={ nieuw:"status-nieuw", drank:"status-drank", run:"status-run", koffie:"status-koffie", rekening:"status-rekening" };
 
-/* ===== Elements ===== */
-const groupsEl = document.getElementById('groups');
-const overlay=document.getElementById('overlay');
-const cancelBtn=document.getElementById('cancelModal');
-const openNoteBtn=document.getElementById('openNote');
-const statusChoices=document.getElementById('statusChoices');
-const noteEditor=document.getElementById('noteEditor');
-const noteInput=document.getElementById('noteInput');
-const saveNoteBtn=document.getElementById('saveNote');
-const deleteNoteBtn=document.getElementById('deleteNote');
-const cancelNoteBtn=document.getElementById('cancelNote');
-const choiceBtns=overlay.querySelectorAll('.choice');
-const resetAllBtn=document.getElementById('resetAll');
+const groupsEl=document.getElementById("groups");
+const statusOverlay=document.getElementById("statusOverlay");
+const textOverlay=document.getElementById("textOverlay");
+const customOverlay=document.getElementById("customOverlay");
+const alertScreen=document.getElementById("alertScreen");
+const alertText=document.getElementById("alertText");
 
-const helpBtn=document.getElementById('helpBtn');
-const helpOverlay=document.getElementById('helpOverlay');
-const helpCancel=document.getElementById('helpCancel');
+let activeTable=null;
 
-const textBtn=document.getElementById('textBtn');
-const textOverlay=document.getElementById('textOverlay');
-const textCancel=document.getElementById('textCancel');
-const openCustomText=document.getElementById('openCustomText');
-
-const customTextOverlay=document.getElementById('customTextOverlay');
-const customTextInput=document.getElementById('customTextInput');
-const customTextSend=document.getElementById('customTextSend');
-const customTextClose=document.getElementById('customTextClose');
-
-const alertScreen=document.getElementById('alertScreen');
-const alertSub=document.getElementById('alertSub');
-
-/* ===== State ===== */
-let rows = new Map();
-let timerInterval=null;
-let pendingTableEl=null;
-let tableChannel=null, eventsChannel=null;
-let lastRealtimeAt=0;
-
-/* ===== Data IO ===== */
-function keyOf(zone, n){ return `${zone}-${n}`; }
-async function fetchAll(){
-  const { data, error } = await sb.from('tables_status').select('*');
-  if(error){ console.error('fetchAll error', error); return; }
-  rows = new Map(data.map(r=>[keyOf(r.zone,r.table_num), r]));
-}
-async function upsertByNumber(n, patch){
-  const zone = zoneFor(n);
-  const prev = rows.get(keyOf(zone,n)) || { zone, table_num:n };
-  const payload = { status:null, status_started:null, note:null, num_marked:false, ...prev, ...patch, updated_at:new Date().toISOString() };
-  const { data, error } = await sb.from('tables_status').upsert(payload).select().single();
-  if(error){ console.error('upsert error', error); return prev; }
-  rows.set(keyOf(zone,n), data);
-  return data;
-}
-
-/* ===== Helpers ===== */
-function ensureChild(cell, selector, className){
-  let el = cell.querySelector(selector);
-  if(!el){ el = document.createElement('div'); el.className = className; cell.appendChild(el); }
-  return el;
-}
-function setNote(cell, text){ ensureChild(cell,'.note','note').textContent = text || ''; }
-function setTimer(cell, text){ ensureChild(cell,'.timer','timer').textContent = text || ''; }
-function setNumFlag(cell, flagged){
-  const numEl = cell.querySelector('.num') || ensureChild(cell,'.num','num');
-  numEl.classList.toggle('num-flagged', !!flagged);
-}
-function applyStatusClass(cell,status){
-  cell.classList.remove(...Object.values(STATUS_CLASSES));
-  if(status){ cell.classList.add(STATUS_CLASSES[status]); cell.setAttribute('data-status',status); }
-  else { cell.removeAttribute('data-status'); }
-}
-function fmtElapsed(ms){
-  if(ms<0||!isFinite(ms))return '';
-  const total = Math.floor(ms/1000), s=total%60, m=Math.floor(total/60)%60, h=Math.floor(total/3600);
-  const pad=n=>n<10?'0'+n:''+n;
-  return h?`${h}:${pad(m)}:${pad(s)}`:`${m}:${pad(s)}`;
-}
-
-/* ===== Render ===== */
+/* RENDER */
 function render(){
-  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
-  groupsEl.innerHTML = '';
-
-  for(const group of GROUPS){
-    const nums = expandRanges(group.ranges);
-
-    const wrap = document.createElement('section'); wrap.className='group';
-    const label = document.createElement('div'); label.className='group-label'; label.textContent=group.label;
-    const grid = document.createElement('div'); grid.className='group-grid'; grid.dataset.zone = group.zone;
-
-    wrap.appendChild(label); wrap.appendChild(grid);
+  groupsEl.innerHTML="";
+  GROUPS.forEach(g=>{
+    const wrap=document.createElement("div");
+    wrap.className="group";
+    wrap.innerHTML=`<div class="group-label">${g.label}</div><div class="group-grid"></div>`;
+    const grid=wrap.querySelector(".group-grid");
+    grid.style.setProperty("--cols",Math.ceil(Math.sqrt(g.range[1]-g.range[0]+1)));
+    for(let i=g.range[0];i<=g.range[1];i++){
+      const t=document.createElement("div");
+      t.className="table";
+      t.innerHTML=`<div class="num">${i}</div><div class="note"></div><div class="timer"></div>`;
+      t.onclick=()=>{activeTable=t;statusOverlay.classList.add("open")};
+      grid.appendChild(t);
+    }
     groupsEl.appendChild(wrap);
-
-    for(const n of nums){
-      const r = rows.get(keyOf(group.zone,n)) || {};
-      const cell=document.createElement('button');
-      cell.className='table'; cell.type='button'; cell.dataset.num=n; cell.dataset.zone=group.zone;
-
-      const numEl=document.createElement('div'); numEl.className='num'; numEl.textContent=n; cell.appendChild(numEl);
-      const mid=document.createElement('div'); mid.style.width='1px'; mid.style.height='1px'; cell.appendChild(mid);
-      const noteEl=document.createElement('div'); noteEl.className='note'; cell.appendChild(noteEl);
-      const timerEl=document.createElement('div'); timerEl.className='timer'; cell.appendChild(timerEl);
-
-      applyStatusClass(cell, r.status || null);
-      setNote(cell, r.note || '');
-      setNumFlag(cell, !!r.num_marked);
-
-      cell.addEventListener('click', async ()=>{
-        const cur = rows.get(keyOf(group.zone,n)) || {};
-        const hasStatus = !!cur.status || cell.hasAttribute('data-status');
-        if(hasStatus){
-          const keepFlag = !!cur.num_marked;
-          await upsertByNumber(n, { status:null, status_started:null, num_marked: keepFlag });
-          applyStatusClass(cell, null);
-          setTimer(cell,'');
-          setNumFlag(cell, keepFlag);
-          return;
-        }
-        pendingTableEl = cell;
-        noteInput.value = cur.note || '';
-        showChoicesPane();
-        overlay.classList.add('open');
-      });
-
-      grid.appendChild(cell);
-    }
-  }
-
-  function tick(){
-    const now = Date.now();
-    document.querySelectorAll('.table').forEach(cell=>{
-      const n = Number(cell.dataset.num);
-      const z = cell.dataset.zone;
-      const r = rows.get(keyOf(z, n));
-      if(r && r.status && r.status_started){
-        setTimer(cell, fmtElapsed(now - Date.parse(r.status_started)));
-      } else {
-        setTimer(cell, '');
-      }
-    });
-  }
-  tick();
-  timerInterval = setInterval(tick, 1000);
-
-  layoutToFit();
-}
-
-/* ===== Popup panes ===== */
-function showChoicesPane(){ statusChoices.style.display='grid'; noteEditor.classList.remove('open'); }
-function showNotePane(){ statusChoices.style.display='none'; noteEditor.classList.add('open'); }
-
-/* ===== Status keuze ===== */
-choiceBtns.forEach(btn=>{
-  btn.addEventListener('click', async ()=>{
-    if(!pendingTableEl) return;
-    const choice = btn.dataset.choice;
-    const n = Number(pendingTableEl.dataset.num);
-
-    if(choice === 'reset'){
-      await upsertByNumber(n, { num_marked:false });
-      setNumFlag(pendingTableEl, false);
-      overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
-      return;
-    }
-
-    const patch = { status:choice, status_started:new Date().toISOString() };
-    if(choice === 'nieuw'){ patch.num_marked = true; }
-    await upsertByNumber(n, patch);
-    applyStatusClass(pendingTableEl, choice);
-    if(choice === 'nieuw'){ setNumFlag(pendingTableEl, true); }
-    overlay.classList.remove('open'); pendingTableEl=null;
   });
-});
+}
+render();
 
-/* ===== Notities ===== */
-openNoteBtn.addEventListener('click',()=>{ if(pendingTableEl) showNotePane(); });
-saveNoteBtn.addEventListener('click', async ()=>{
-  if(!pendingTableEl) return;
-  const n = Number(pendingTableEl.dataset.num);
-  const text = noteInput.value.trim();
-  await upsertByNumber(n, { note: text || null });
-  pendingTableEl.querySelector('.note').textContent = text;
-  overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
-});
-deleteNoteBtn.addEventListener('click', async ()=>{
-  if(!pendingTableEl) return;
-  const n = Number(pendingTableEl.dataset.num);
-  await upsertByNumber(n, { note: null });
-  pendingTableEl.querySelector('.note').textContent = '';
-  overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane();
-});
-cancelNoteBtn.addEventListener('click',()=>{ showChoicesPane(); });
-
-/* ===== Overlay close ===== */
-cancelBtn.addEventListener('click',()=>{ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); });
-overlay.addEventListener('click',e=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingTableEl=null; showChoicesPane(); }});
-
-/* ===== Reset ===== */
-async function fullResetAll(){
-  for(const g of GROUPS){
-    for(const n of expandRanges(g.ranges)){
-      const r = rows.get(keyOf(g.zone,n)); if(!r) continue;
-      await upsertByNumber(n, { status:null, status_started:null, num_marked:false });
+/* STATUS */
+document.querySelectorAll(".choice[data-status]").forEach(c=>{
+  c.onclick=()=>{
+    if(!activeTable)return;
+    const s=c.dataset.status;
+    activeTable.className="table";
+    activeTable.removeAttribute("data-status");
+    if(s!=="reset"){
+      activeTable.dataset.status=s;
+      activeTable.classList.add("status-"+s);
+      if(s==="nieuw")activeTable.querySelector(".num").classList.add("flagged");
     }
-  }
-  render();
-}
-resetAllBtn.addEventListener('click', fullResetAll);
-
-/* Auto reset om 02:00 */
-async function autoDailyResetCheck(){
-  const now = new Date(); const hh = now.getHours(); const mm = now.getMinutes();
-  const todayKey = now.toISOString().slice(0,10); const last = localStorage.getItem('last_auto_reset');
-  if(hh === 2 && mm < 5 && last !== todayKey){ await fullResetAll(); localStorage.setItem('last_auto_reset', todayKey); }
-}
-setInterval(autoDailyResetCheck, 60_000);
-
-/* ===== Fullscreen message (HELP + TEXT) ===== */
-function showBroadcast(message){
-  alertSub.textContent = message;
-  alertScreen.classList.add('show');
-
-  const close = ()=>{
-    alertScreen.classList.remove('show');
-    alertScreen.removeEventListener('click', close);
+    statusOverlay.classList.remove("open");
   };
-  alertScreen.addEventListener('click', close);
-  setTimeout(close, 6000);
-}
-
-/* ✅ Eén centrale broadcast naar Supabase */
-async function sendBroadcast(message){
-  const msg = (message || '').toString().trim();
-  if(!msg) return;
-  const { error } = await sb.from('help_events').insert({ kind: msg }); // hergebruik bestaande tabel
-  if(error){ console.error('broadcast insert error', error); }
-}
-
-/* Subscribe op broadcasts */
-function subscribeBroadcasts(){
-  if(eventsChannel){ sb.removeChannel(eventsChannel); }
-  eventsChannel = sb.channel('help_events:all')
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'help_events' }, payload=>{
-      const row = payload?.new;
-      if(row?.kind) showBroadcast(row.kind);
-    })
-    .subscribe();
-}
-
-/* ===== Realtime tafels ===== */
-function subscribeRealtimeTables(){
-  if(tableChannel){ sb.removeChannel(tableChannel); }
-  tableChannel = sb.channel('tables_status:all')
-    .on('postgres_changes', { event:'*', schema:'public', table:'tables_status' }, payload=>{
-      const row = payload.new || payload.old; if(!row) return;
-      rows.set(keyOf(row.zone,row.table_num), payload.new || row);
-      const cell = document.querySelector(`.table[data-zone="${row.zone}"][data-num="${row.table_num}"]`);
-      if(cell){
-        const r = rows.get(keyOf(row.zone,row.table_num));
-        applyStatusClass(cell, r.status || null);
-        setNote(cell, r.note || '');
-        setNumFlag(cell, !!r.num_marked);
-        if(!(r && r.status && r.status_started)) setTimer(cell,'');
-      }
-    })
-    .subscribe();
-}
-setInterval(async ()=>{
-  if(Date.now() - lastRealtimeAt > 7000){
-    const before = JSON.stringify([...rows.entries()]);
-    await fetchAll();
-    const after = JSON.stringify([...rows.entries()]);
-    if(before !== after) render();
-  }
-}, 6000);
-
-/* ===== HELP UI ===== */
-helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
-helpOverlay.addEventListener('click', e=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
-helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
-helpOverlay.querySelectorAll('[data-broadcast]').forEach(btn=>{
-  btn.addEventListener('click', async ()=>{
-    const msg = btn.dataset.broadcast;
-    helpOverlay.classList.remove('open');
-    await sendBroadcast(msg);
-    showBroadcast(msg);
-  });
 });
 
-/* ===== TEXT UI ===== */
-textBtn.addEventListener('click', ()=> textOverlay.classList.add('open'));
-textOverlay.addEventListener('click', e=>{ if(e.target===textOverlay) textOverlay.classList.remove('open'); });
-textCancel.addEventListener('click', ()=> textOverlay.classList.remove('open'));
-
-/* Presets */
-textOverlay.querySelectorAll('[data-text]').forEach(btn=>{
-  btn.addEventListener('click', async ()=>{
-    const msg = btn.dataset.text;
-    textOverlay.classList.remove('open');
-    await sendBroadcast(msg);
-    showBroadcast(msg);
-  });
+/* TEXT */
+document.getElementById("textBtn").onclick=()=>textOverlay.classList.add("open");
+textOverlay.querySelectorAll("[data-text]").forEach(b=>{
+  b.onclick=()=>broadcast(b.dataset.text);
 });
+document.getElementById("customText").onclick=()=>{
+  textOverlay.classList.remove("open");
+  customOverlay.classList.add("open");
+};
+document.getElementById("sendCustom").onclick=()=>{
+  broadcast(document.getElementById("customInput").value);
+};
 
-/* Eigen invoer */
-openCustomText.addEventListener('click', ()=>{
-  textOverlay.classList.remove('open');
-  customTextInput.value = '';
-  customTextOverlay.classList.add('open');
-  setTimeout(()=>customTextInput.focus(), 50);
-});
-customTextClose.addEventListener('click', ()=> customTextOverlay.classList.remove('open'));
-customTextOverlay.addEventListener('click', e=>{ if(e.target===customTextOverlay) customTextOverlay.classList.remove('open'); });
-
-async function sendCustom(){
-  const msg = customTextInput.value.trim();
-  if(!msg) return;
-  customTextOverlay.classList.remove('open');
-  await sendBroadcast(msg);
-  showBroadcast(msg);
+/* BROADCAST */
+function broadcast(msg){
+  if(!msg)return;
+  alertText.textContent=msg;
+  alertScreen.classList.add("show");
+  setTimeout(()=>alertScreen.classList.remove("show"),6000);
+  alertScreen.onclick=()=>alertScreen.classList.remove("show");
 }
-customTextSend.addEventListener('click', sendCustom);
-customTextInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); sendCustom(); }});
-
-/* ===== ✅ Dynamische layout zodat ALLES past ===== */
-function layoutToFit(){
-  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
-  const groupsRect = groupsEl.getBoundingClientRect();
-  const availW = Math.floor(groupsRect.width);
-  const availH = Math.floor(groupsRect.height);
-
-  const LABEL_H = 34;
-  const BETWEEN_GROUPS = 12;
-
-  const N_b = expandRanges(RANGES_BENEDEN).length; // 13
-  const N_t = expandRanges(RANGES_BOVEN).length;   // 39
-
-  let best = null;
-
-  for(let cb=1; cb<=N_b; cb++){
-    const rb = Math.ceil(N_b / cb);
-    const tileW_b = Math.floor( (availW - (cb-1)*gap) / cb );
-
-    for(let ct=1; ct<=N_t; ct++){
-      const rt = Math.ceil(N_t / ct);
-      const tileW_t = Math.floor( (availW - (ct-1)*gap) / ct );
-
-      const totalRows = rb + rt;
-      const totalGapsV = (rb-1 + rt-1) * gap + BETWEEN_GROUPS;
-      const labelsH = 2 * (LABEL_H + 8);
-
-      const tileH_limit = Math.floor( (availH - labelsH - totalGapsV) / totalRows );
-      const tileW_limit = Math.min(tileW_b, tileW_t);
-      const tile = Math.max(0, Math.min(tileH_limit, tileW_limit));
-
-      if(!best || tile > best.tile){
-        best = { cb, ct, rb, rt, tile };
-      }
-    }
-  }
-
-  if(!best || best.tile < 22){ best = best || {cb:5,ct:8,tile:22}; best.tile = 22; }
-
-  document.documentElement.style.setProperty('--tile', best.tile+'px');
-
-  document.querySelectorAll('.group-grid').forEach(grid=>{
-    const zone = grid.dataset.zone;
-    grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
-  });
-}
-
-let rAFid=null;
-function scheduleLayout(){ if(rAFid) cancelAnimationFrame(rAFid); rAFid = requestAnimationFrame(()=>{ rAFid=null; layoutToFit(); }); }
-window.addEventListener('resize', scheduleLayout);
-window.addEventListener('orientationchange', ()=>setTimeout(layoutToFit, 50));
-
-/* ===== Init ===== */
-(async function(){
-  await fetchAll();
-  render();
-  subscribeRealtimeTables();
-  subscribeBroadcasts();
-  autoDailyResetCheck();
-  layoutToFit();
-})();
 </script>
 </body>
 </html>
