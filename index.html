@@ -11,9 +11,8 @@
     --nieuw:#ef4444; --drank:#f59e0b; --run:#10b981; --koffie:#7c3aed; --rekening:#0ea5e9;
     --border:#e5e7eb; --label:#eef2f7;
 
-    /* dynamisch in JS */
-    --gap:10px;
-    --tile:86px;
+    --gap:10px;   /* dynamisch in JS */
+    --tile:86px;  /* dynamisch in JS */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -73,7 +72,7 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:10px;            /* used by layoutToFit (betweenGroups) */
+    gap:10px;
     overflow:hidden;
   }
   .group{
@@ -81,10 +80,8 @@
     display:flex;
     flex-direction:column;
     gap:6px;
-    /* flex is set dynamically in JS based on row counts (prevents big empty gap) */
   }
 
-  /* compacte labels */
   .group-label{
     flex:0 0 auto;
     background:var(--label);
@@ -382,7 +379,7 @@
     <div class="modal-header">Eigen bericht</div>
     <div class="input-wrap">
       <input id="customTextInput" type="text" maxlength="80" placeholder="Typ een bericht (max 80 tekens)..." />
-      <div class="input-hint">Wordt direct op alle apparaten getoond. Verdwijnt bij 1 tik of na 6 sec.</div>
+      <div class="input-hint">Wordt direct op alle apparaten getoond. Verdwijnt alleen bij 1 tik.</div>
     </div>
     <div class="modal-footer">
       <button class="link" id="customTextClose">Sluiten</button>
@@ -461,6 +458,7 @@ let pendingCell = null;
 let timerInterval = null;
 let tablesChannel = null;
 let eventsChannel = null;
+let broadcastCloseHandler = null;
 
 /* ===== Data ===== */
 async function fetchAll(){
@@ -513,7 +511,7 @@ function applyResponsiveGap(){
   document.documentElement.style.setProperty('--gap', gap + 'px');
 }
 
-/* ✅ Tiles maximaal + hoogte verdelen op rij-aantal (geen groot leeg gat) */
+/* ✅ Tiles maximaal + hoogte verdelen op rij-aantal */
 function layoutToFit(){
   const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
 
@@ -569,7 +567,6 @@ function layoutToFit(){
     grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
   });
 
-  // ✅ flex verdeling: hoogte in verhouding tot rijen
   const benedenGroup = document.querySelector('.group[data-zone="bt"]');
   const bovenGroup   = document.querySelector('.group[data-zone="boven"]');
   if(benedenGroup) benedenGroup.style.flex = `${best.rb} 1 0%`;
@@ -586,7 +583,7 @@ function render(){
 
     const wrap = document.createElement('section');
     wrap.className = 'group';
-    wrap.dataset.zone = group.zone; // ✅ nodig voor flex verdeling
+    wrap.dataset.zone = group.zone;
 
     const label = document.createElement('div');
     label.className = 'group-label';
@@ -746,7 +743,7 @@ async function autoDailyResetCheck(){
 }
 setInterval(autoDailyResetCheck, 60_000);
 
-/* Broadcast */
+/* ===== Broadcast: alleen sluiten bij tik ===== */
 function showBroadcast(message){
   const msg = (message || '').toString().trim();
   if(!msg) return;
@@ -754,13 +751,20 @@ function showBroadcast(message){
   alertTextEl.textContent = msg;
   alertScreenEl.classList.add('show');
 
-  const close = ()=>{
+  // verwijder oude handler (als er een open stond)
+  if(broadcastCloseHandler){
+    alertScreenEl.removeEventListener('click', broadcastCloseHandler);
+  }
+
+  broadcastCloseHandler = ()=>{
     alertScreenEl.classList.remove('show');
-    alertScreenEl.removeEventListener('click', close);
+    alertScreenEl.removeEventListener('click', broadcastCloseHandler);
+    broadcastCloseHandler = null;
   };
-  alertScreenEl.addEventListener('click', close);
-  setTimeout(close, 6000);
+
+  alertScreenEl.addEventListener('click', broadcastCloseHandler);
 }
+
 async function sendBroadcast(message){
   const msg = (message || '').toString().trim();
   if(!msg) return;
@@ -802,6 +806,7 @@ openCustomTextEl.addEventListener('click', ()=>{
 });
 customTextCloseEl.addEventListener('click', ()=> customTextOverlayEl.classList.remove('open'));
 customTextOverlayEl.addEventListener('click', (e)=>{ if(e.target===customTextOverlayEl) customTextOverlayEl.classList.remove('open'); });
+
 async function sendCustom(){
   const msg = customTextInputEl.value.trim();
   if(!msg) return;
