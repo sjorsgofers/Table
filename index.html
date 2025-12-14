@@ -10,8 +10,9 @@
     --nieuw:#ef4444; --drank:#f59e0b; --run:#10b981; --koffie:#7c3aed; --rekening:#0ea5e9;
     --soft:#f1f5f9; --border:#e5e7eb; --label:#eef2f7;
 
+    /* ✅ worden dynamisch gezet in JS */
     --gap:10px;
-    --tile:86px; /* wordt dynamisch berekend */
+    --tile:86px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -23,13 +24,13 @@
 
   header{
     background:var(--card); border-bottom:1px solid var(--border);
-    padding:10px 14px;
+    padding:8px 12px; /* iets compacter */
     display:flex; align-items:center; gap:10px;
     flex:0 0 auto;
   }
   .title{
     font-weight:900;
-    font-size:clamp(15px, 2.6vw, 20px);
+    font-size:clamp(14px, 2.4vw, 19px);
     flex:1;
     white-space:nowrap;
     overflow:hidden;
@@ -41,8 +42,8 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:10px;
-    padding:10px 14px 14px;
+    gap:8px; /* compacter */
+    padding:8px 12px 12px; /* compacter */
   }
 
   .toolbar{
@@ -57,7 +58,7 @@
     background:#fff;
     border:1px solid var(--border);
     color:#111827;
-    padding:8px 12px;
+    padding:7px 11px; /* compacter */
     border-radius:10px;
     font-weight:900;
     cursor:pointer;
@@ -66,13 +67,12 @@
   .help-btn{ border:2px solid var(--nieuw); color:var(--nieuw); letter-spacing:1px; }
   .text-btn{ border:2px solid #111827; color:#111827; letter-spacing:1px; }
 
-  /* ✅ Alles moet in beeld passen: geen scroll, en tiles maximaal */
   .groups{
     flex:1 1 auto;
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:10px; /* iets compacter */
     overflow:hidden;
   }
   .group{
@@ -80,24 +80,28 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:8px;
+    gap:6px; /* compacter */
   }
+
+  /* ✅ COMPACTE LABELS */
   .group-label{
     flex:0 0 auto;
     background:var(--label);
     border:1px solid var(--border);
-    border-radius:10px;
-    padding:7px 10px;
+    border-radius:8px;          /* kleiner */
+    padding:4px 8px;            /* kleiner */
     font-weight:1000;
     letter-spacing:.2px;
-    font-size:clamp(13px, 2.3vw, 16px);
+    font-size:clamp(12px, 2.0vw, 14px); /* kleiner */
+    line-height:1.1;
   }
+
   .group-grid{
     --cols: 6;
     display:grid;
     grid-template-columns:repeat(var(--cols), var(--tile));
     grid-auto-rows:var(--tile);
-    gap:var(--gap);
+    gap:var(--gap); /* ✅ dynamisch */
     justify-content:center;
     align-content:start;
     flex:1 1 auto;
@@ -114,8 +118,8 @@
     grid-template-rows:auto 1fr auto;
     align-items:center;
     justify-items:center;
-    padding:8px;
-    gap:6px;
+    padding:7px; /* iets compacter zodat content niet knelt */
+    gap:4px;
     position:relative;
     user-select:none;
     cursor:pointer;
@@ -131,7 +135,7 @@
     font-weight:700;
     font-size:calc(var(--tile) * 0.14);
     text-align:center;
-    line-height:1.15;
+    line-height:1.12;
     max-width:100%;
     max-height:2.3em;
     overflow:hidden;
@@ -141,10 +145,9 @@
     -webkit-box-orient:vertical;
   }
 
-  /* Timer: gecentreerd onderaan */
   .timer{
     position:absolute;
-    bottom:6px;
+    bottom:5px;
     left:50%;
     transform:translateX(-50%);
     font-weight:800;
@@ -153,7 +156,6 @@
     pointer-events:none;
   }
 
-  /* Status kleuren */
   .table[data-status]{ color:#fff; border-color:transparent; }
   .table[data-status] .num{ color:#fff !important; }
   .table[data-status] .note{ color:#fff; }
@@ -165,7 +167,7 @@
   .table.status-koffie{ background:var(--koffie); }
   .table.status-rekening{ background:var(--rekening); }
 
-  /* ===== Overlays / Modals ===== */
+  /* ===== Overlays ===== */
   .overlay{
     position:fixed; inset:0;
     background:rgba(0,0,0,.6);
@@ -185,13 +187,13 @@
     overflow:hidden;
   }
   .modal-header{
-    padding:14px 16px;
+    padding:12px 14px;
     font-weight:1000;
     border-bottom:1px solid var(--border);
     background:#fff;
   }
   .modal-grid{
-    padding:14px;
+    padding:12px 14px;
     display:grid;
     gap:10px;
     grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
@@ -221,7 +223,7 @@
   .swatch.rekening{background:var(--rekening)}
 
   .modal-footer{
-    padding:12px 14px;
+    padding:10px 12px;
     border-top:1px solid var(--border);
     display:flex;
     gap:10px;
@@ -233,7 +235,7 @@
     border:1px solid var(--border);
     background:#fff;
     border-radius:12px;
-    padding:10px 12px;
+    padding:9px 11px;
     font-weight:900;
     cursor:pointer;
   }
@@ -246,7 +248,7 @@
 
   .note-editor{
     display:none;
-    padding:14px;
+    padding:12px 14px;
     border-top:1px solid var(--border);
     background:#fff;
   }
@@ -267,12 +269,10 @@
     margin-top:10px;
   }
 
-  /* HELP/TEXT menu overlay */
   .menu-header.help{ color:var(--nieuw); }
   .menu-header.text{ color:#111827; }
 
-  /* Custom text input */
-  .input-wrap{ padding:14px; display:grid; gap:10px; }
+  .input-wrap{ padding:12px 14px; display:grid; gap:10px; }
   .input-wrap input{
     width:100%;
     padding:12px 12px;
@@ -282,7 +282,6 @@
   }
   .input-hint{ font-size:12px; color:var(--muted); }
 
-  /* Fullscreen broadcast: alleen tekst */
   .alert-screen{
     position:fixed; inset:0;
     background:#fff; color:#000;
@@ -492,19 +491,9 @@ function applyStatus(cell, status){
     cell.removeAttribute('data-status');
   }
 }
-
-function setNote(cell, txt){
-  const el = cell.querySelector('.note');
-  if(el) el.textContent = txt || '';
-}
-function setTimer(cell, txt){
-  const el = cell.querySelector('.timer');
-  if(el) el.textContent = txt || '';
-}
-function setNumFlag(cell, flagged){
-  const el = cell.querySelector('.num');
-  if(el) el.classList.toggle('num-flagged', !!flagged);
-}
+function setNote(cell, txt){ cell.querySelector('.note').textContent = txt || ''; }
+function setTimer(cell, txt){ cell.querySelector('.timer').textContent = txt || ''; }
+function setNumFlag(cell, flagged){ cell.querySelector('.num').classList.toggle('num-flagged', !!flagged); }
 function fmtElapsed(ms){
   const total = Math.max(0, Math.floor(ms/1000));
   const s = total % 60;
@@ -560,7 +549,7 @@ function render(){
         const cur = rows.get(keyOf(group.zone,n)) || {};
         const hasStatus = !!cur.status || cell.hasAttribute('data-status');
 
-        // ✅ als er status is: 1 klik = leegmaken (maar num_marked blijft)
+        // 1 klik op gekleurde tafel = leeg (num_marked blijft)
         if(hasStatus){
           const keepFlag = !!cur.num_marked;
           await upsertTable(group.zone, n, { status:null, status_started:null, num_marked: keepFlag });
@@ -570,7 +559,6 @@ function render(){
           return;
         }
 
-        // anders: popup openen
         pendingCell = cell;
         modalTableNum.textContent = n;
         noteInput.value = cur.note || '';
@@ -582,7 +570,6 @@ function render(){
     }
   }
 
-  // timers
   function tick(){
     const now = Date.now();
     document.querySelectorAll('.table').forEach(cell=>{
@@ -599,19 +586,13 @@ function render(){
   tick();
   timerInterval = setInterval(tick, 1000);
 
-  // ✅ maximaliseer tile size zodat alles past
-  layoutToFit();
+  applyResponsiveGap();  // ✅ dynamische gap
+  layoutToFit();         // ✅ tiles maximaal
 }
 
 /* ===== Modal panes ===== */
-function showChoicesPane(){
-  statusChoices.style.display = 'grid';
-  noteEditor.classList.remove('open');
-}
-function showNotePane(){
-  statusChoices.style.display = 'none';
-  noteEditor.classList.add('open');
-}
+function showChoicesPane(){ statusChoices.style.display = 'grid'; noteEditor.classList.remove('open'); }
+function showNotePane(){ statusChoices.style.display = 'none'; noteEditor.classList.add('open'); }
 
 /* ===== Status choices ===== */
 overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
@@ -624,16 +605,11 @@ overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
     if(choice === 'resetnum'){
       await upsertTable(zone, num, { num_marked:false });
       setNumFlag(pendingCell, false);
-      overlay.classList.remove('open');
-      pendingCell = null;
-      showChoicesPane();
+      overlay.classList.remove('open'); pendingCell=null; showChoicesPane();
       return;
     }
 
-    // set status + timer start
     const patch = { status: choice, status_started: new Date().toISOString() };
-
-    // nieuw: num_marked aan
     if(choice === 'nieuw') patch.num_marked = true;
 
     await upsertTable(zone, num, patch);
@@ -646,7 +622,7 @@ overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
   });
 });
 
-/* Note buttons */
+/* Note */
 openNoteBtn.addEventListener('click', ()=>{ if(pendingCell) showNotePane(); });
 saveNoteBtn.addEventListener('click', async ()=>{
   if(!pendingCell) return;
@@ -655,9 +631,7 @@ saveNoteBtn.addEventListener('click', async ()=>{
   const txt = noteInput.value.trim();
   await upsertTable(zone, num, { note: txt || null });
   setNote(pendingCell, txt);
-  overlay.classList.remove('open');
-  pendingCell = null;
-  showChoicesPane();
+  overlay.classList.remove('open'); pendingCell=null; showChoicesPane();
 });
 deleteNoteBtn.addEventListener('click', async ()=>{
   if(!pendingCell) return;
@@ -665,26 +639,14 @@ deleteNoteBtn.addEventListener('click', async ()=>{
   const num = Number(pendingCell.dataset.num);
   await upsertTable(zone, num, { note: null });
   setNote(pendingCell, '');
-  overlay.classList.remove('open');
-  pendingCell = null;
-  showChoicesPane();
+  overlay.classList.remove('open'); pendingCell=null; showChoicesPane();
 });
 cancelNoteBtn.addEventListener('click', showChoicesPane);
 
-cancelModalBtn.addEventListener('click', ()=>{
-  overlay.classList.remove('open');
-  pendingCell = null;
-  showChoicesPane();
-});
-overlay.addEventListener('click', (e)=>{
-  if(e.target === overlay){
-    overlay.classList.remove('open');
-    pendingCell = null;
-    showChoicesPane();
-  }
-});
+cancelModalBtn.addEventListener('click', ()=>{ overlay.classList.remove('open'); pendingCell=null; showChoicesPane(); });
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingCell=null; showChoicesPane(); }});
 
-/* ===== Reset alles ===== */
+/* Reset */
 async function fullResetAll(){
   for(const g of GROUPS){
     for(const n of expandRanges(g.ranges)){
@@ -697,7 +659,7 @@ async function fullResetAll(){
 }
 resetAllBtn.addEventListener('click', fullResetAll);
 
-/* Auto reset om 02:00 */
+/* Auto reset 02:00 */
 async function autoDailyResetCheck(){
   const now = new Date();
   const hh = now.getHours(), mm = now.getMinutes();
@@ -710,7 +672,7 @@ async function autoDailyResetCheck(){
 }
 setInterval(autoDailyResetCheck, 60_000);
 
-/* ===== Broadcast screen (HELP + TEXT) ===== */
+/* Broadcast */
 function showBroadcast(message){
   const msg = (message || '').toString().trim();
   if(!msg) return;
@@ -725,16 +687,18 @@ function showBroadcast(message){
   alertScreen.addEventListener('click', close);
   setTimeout(close, 6000);
 }
-
 async function sendBroadcast(message){
   const msg = (message || '').toString().trim();
   if(!msg) return;
-  // hergebruik bestaande tabel
   const { error } = await sb.from('help_events').insert({ kind: msg });
   if(error) console.error('broadcast insert error', error);
 }
 
 /* HELP */
+const helpBtn = document.getElementById('helpBtn');
+const helpOverlay = document.getElementById('helpOverlay');
+const helpCancel = document.getElementById('helpCancel');
+
 helpBtn.addEventListener('click', ()=> helpOverlay.classList.add('open'));
 helpOverlay.addEventListener('click', (e)=>{ if(e.target===helpOverlay) helpOverlay.classList.remove('open'); });
 helpCancel.addEventListener('click', ()=> helpOverlay.classList.remove('open'));
@@ -760,7 +724,6 @@ textOverlay.querySelectorAll('[data-text]').forEach(btn=>{
     showBroadcast(msg);
   });
 });
-
 openCustomText.addEventListener('click', ()=>{
   textOverlay.classList.remove('open');
   customTextInput.value = '';
@@ -769,7 +732,6 @@ openCustomText.addEventListener('click', ()=>{
 });
 customTextClose.addEventListener('click', ()=> customTextOverlay.classList.remove('open'));
 customTextOverlay.addEventListener('click', (e)=>{ if(e.target===customTextOverlay) customTextOverlay.classList.remove('open'); });
-
 async function sendCustom(){
   const msg = customTextInput.value.trim();
   if(!msg) return;
@@ -780,7 +742,7 @@ async function sendCustom(){
 customTextSend.addEventListener('click', sendCustom);
 customTextInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendCustom(); }});
 
-/* ===== Realtime ===== */
+/* Realtime */
 function subscribeRealtimeTables(){
   if(tablesChannel) sb.removeChannel(tablesChannel);
   tablesChannel = sb.channel('tables_status:all')
@@ -800,7 +762,6 @@ function subscribeRealtimeTables(){
     })
     .subscribe();
 }
-
 function subscribeBroadcasts(){
   if(eventsChannel) sb.removeChannel(eventsChannel);
   eventsChannel = sb.channel('help_events:all')
@@ -811,20 +772,35 @@ function subscribeBroadcasts(){
     .subscribe();
 }
 
-/* ===== ✅ Layout algorithm: MAX tile, maar alles past ===== */
-function layoutToFit(){
-  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 10;
+/* ✅ Dynamische gap: klein op kleine schermen, ruim op grote */
+function applyResponsiveGap(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const minSide = Math.min(w, h);
 
+  // Richtwaarden:
+  // - kleine iPhones: 5-6px
+  // - iPad: 8px
+  // - grote schermen: 10-12px
+  let gap = Math.round(minSide / 90); // schaal
+  gap = Math.max(5, Math.min(12, gap)); // clamp 5..12
+
+  document.documentElement.style.setProperty('--gap', gap + 'px');
+}
+
+/* ✅ Tiles maximaal maar alles past */
+function layoutToFit(){
+  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
   const avail = groupsEl.getBoundingClientRect();
   const availW = Math.floor(avail.width);
   const availH = Math.floor(avail.height);
 
-  // labelhoogte dynamisch meten (betrouwbaarder dan schatting)
+  // echte labelhoogte meten
   const labels = groupsEl.querySelectorAll('.group-label');
   let labelH = 0;
   labels.forEach(l=> labelH += Math.ceil(l.getBoundingClientRect().height));
-  const betweenGroups = 12; // gelijk aan CSS gap
 
+  const betweenGroups = 10; // gelijk aan .groups gap (iets compacter)
   const N_b = expandRanges(RANGES_BENEDEN).length; // 13
   const N_t = expandRanges(RANGES_BOVEN).length;   // 39
 
@@ -851,7 +827,6 @@ function layoutToFit(){
     }
   }
 
-  // Als scherm extreem klein is: nog steeds bruikbaar
   if(!best || best.tile < 26) best = { cb:6, ct:10, tile:26 };
 
   document.documentElement.style.setProperty('--tile', best.tile + 'px');
@@ -865,18 +840,25 @@ function layoutToFit(){
 let raf=null;
 function scheduleLayout(){
   if(raf) cancelAnimationFrame(raf);
-  raf = requestAnimationFrame(()=>{ raf=null; layoutToFit(); });
+  raf = requestAnimationFrame(()=>{
+    raf=null;
+    applyResponsiveGap();
+    layoutToFit();
+  });
 }
 window.addEventListener('resize', scheduleLayout);
-window.addEventListener('orientationchange', ()=>setTimeout(layoutToFit, 60));
+window.addEventListener('orientationchange', ()=>setTimeout(()=>{ applyResponsiveGap(); layoutToFit(); }, 60));
 
-/* ===== Init ===== */
+/* Init */
 (async function init(){
   await fetchAll();
   render();
+
   subscribeRealtimeTables();
   subscribeBroadcasts();
+
   autoDailyResetCheck();
+  applyResponsiveGap();
   layoutToFit();
 })();
 </script>
