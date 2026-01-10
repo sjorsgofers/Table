@@ -379,7 +379,7 @@
     <div class="modal-header">Eigen bericht</div>
     <div class="input-wrap">
       <input id="customTextInput" type="text" maxlength="80" placeholder="Typ een bericht (max 80 tekens)..." />
-      <div class="input-hint">Wordt direct op alle apparaten getoond. Verdwijnt alleen bij 1 tik.</div>
+      <div class="input-hint">Wordt direct op alle apparaten getoond. Verdwijnt overal bij 1 tik op 1 scherm.</div>
     </div>
     <div class="modal-footer">
       <button class="link" id="customTextClose">Sluiten</button>
@@ -399,6 +399,9 @@
 const SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+/* ===== Broadcast protocol ===== */
+const BROADCAST_CLEAR = "__CLEAR__";   // speciale event om op ALLE apparaten de overlay te sluiten
 
 /* ===== Config ===== */
 const RANGES_BENEDEN = [[1,13]];
@@ -458,7 +461,7 @@ let pendingCell = null;
 let timerInterval = null;
 let tablesChannel = null;
 let eventsChannel = null;
-let broadcastCloseHandler = null;
+let alertOpen = false;
 
 /* ===== Data ===== */
 async function fetchAll(){
@@ -743,26 +746,26 @@ async function autoDailyResetCheck(){
 }
 setInterval(autoDailyResetCheck, 60_000);
 
-/* ===== Broadcast: alleen sluiten bij tik ===== */
-function showBroadcast(message){
+/* ===== Broadcast: global close bij 1 tik ===== */
+function hideBroadcastLocal(){
+  alertScreenEl.classList.remove('show');
+  alertOpen = false;
+}
+
+function showBroadcastLocal(message){
   const msg = (message || '').toString().trim();
   if(!msg) return;
 
   alertTextEl.textContent = msg;
   alertScreenEl.classList.add('show');
+  alertOpen = true;
+}
 
-  // verwijder oude handler (als er een open stond)
-  if(broadcastCloseHandler){
-    alertScreenEl.removeEventListener('click', broadcastCloseHandler);
-  }
-
-  broadcastCloseHandler = ()=>{
-    alertScreenEl.classList.remove('show');
-    alertScreenEl.removeEventListener('click', broadcastCloseHandler);
-    broadcastCloseHandler = null;
-  };
-
-  alertScreenEl.addEventListener('click', broadcastCloseHandler);
+/* Wanneer je op 1 scherm tikt, sturen we een CLEAR event naar Supabase,
+   zodat ALLE apparaten de overlay sluiten. */
+async function clearBroadcastGlobal(){
+  const { error } = await sb.from('help_events').insert({ kind: BROADCAST_CLEAR });
+  if(error) console.error('broadcast clear insert error', error);
 }
 
 async function sendBroadcast(message){
@@ -771,6 +774,13 @@ async function sendBroadcast(message){
   const { error } = await sb.from('help_events').insert({ kind: msg });
   if(error) console.error('broadcast insert error', error);
 }
+
+/* Klik op het scherm -> sluit overal */
+alertScreenEl.addEventListener('click', async ()=>{
+  if(!alertOpen) return;
+  hideBroadcastLocal();     // meteen lokaal dicht
+  await clearBroadcastGlobal(); // en via realtime bij iedereen
+});
 
 /* HELP */
 helpBtnEl.addEventListener('click', ()=> helpOverlayEl.classList.add('open'));
@@ -781,7 +791,7 @@ helpOverlayEl.querySelectorAll('[data-broadcast]').forEach(btn=>{
     const msg = btn.dataset.broadcast;
     helpOverlayEl.classList.remove('open');
     await sendBroadcast(msg);
-    showBroadcast(msg);
+    showBroadcastLocal(msg);
   });
 });
 
@@ -795,7 +805,7 @@ textOverlayEl.querySelectorAll('[data-text]').forEach(btn=>{
     const msg = btn.dataset.text;
     textOverlayEl.classList.remove('open');
     await sendBroadcast(msg);
-    showBroadcast(msg);
+    showBroadcastLocal(msg);
   });
 });
 openCustomTextEl.addEventListener('click', ()=>{
@@ -812,7 +822,7 @@ async function sendCustom(){
   if(!msg) return;
   customTextOverlayEl.classList.remove('open');
   await sendBroadcast(msg);
-  showBroadcast(msg);
+  showBroadcastLocal(msg);
 }
 customTextSendEl.addEventListener('click', sendCustom);
 customTextInputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendCustom(); }});
@@ -837,12 +847,20 @@ function subscribeRealtimeTables(){
     })
     .subscribe();
 }
+
 function subscribeBroadcasts(){
   if(eventsChannel) sb.removeChannel(eventsChannel);
   eventsChannel = sb.channel('help_events:all')
     .on('postgres_changes', { event:'INSERT', schema:'public', table:'help_events' }, payload=>{
       const row = payload?.new;
-      if(row?.kind) showBroadcast(row.kind);
+      const kind = row?.kind;
+      if(!kind) return;
+
+      if(kind === BROADCAST_CLEAR){
+        hideBroadcastLocal();
+        return;
+      }
+      showBroadcastLocal(kind);
     })
     .subscribe();
 }
