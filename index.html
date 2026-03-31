@@ -7,34 +7,60 @@
 
 <style>
   :root{
-    --bg:#f6f7f9; --card:#fff; --text:#111827; --muted:#6b7280;
-    --nieuw:#ef4444; --drank:#f59e0b; --run:#10b981; --koffie:#7c3aed; --rekening:#0ea5e9;
-    --border:#e5e7eb; --label:#eef2f7;
+    --bg:#0b0b0b;
+    --card:#111111;
+    --card-2:#0f0f0f;
+    --text:#ffffff;
+    --muted:rgba(255,255,255,.72);
+    --gold:#c8a45b;
+    --gold-soft:rgba(200,164,91,.18);
 
-    --gap:10px;   /* dynamisch in JS */
-    --tile:86px;  /* dynamisch in JS */
+    --nieuw:#c8a45b;
+    --drank:#f59e0b;
+    --run:#10b981;
+    --koffie:#7c3aed;
+    --rekening:#0ea5e9;
+
+    --border:#c8a45b;
+    --label:#111111;
+
+    --gap:10px;
+    --tile:86px;
+    --radius:18px;
   }
+
   *{box-sizing:border-box}
   html,body{height:100%}
+
   body{
-    margin:0; background:var(--bg); color:var(--text);
-    font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    display:flex; flex-direction:column; min-height:100vh;
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font:16px/1.35 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
   }
 
   header{
-    background:var(--card); border-bottom:1px solid var(--border);
-    padding:8px 12px;
-    display:flex; align-items:center; gap:10px;
+    background:var(--bg);
+    border-bottom:1px solid rgba(200,164,91,.5);
+    padding:10px 14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
     flex:0 0 auto;
   }
+
   .title{
-    font-weight:900;
-    font-size:clamp(14px, 2.4vw, 19px);
+    font-weight:1000;
+    font-size:clamp(15px, 2.6vw, 20px);
     flex:1;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+    color:var(--text);
+    letter-spacing:.2px;
   }
 
   main{
@@ -42,8 +68,9 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:8px;
-    padding:8px 12px 12px;
+    gap:10px;
+    padding:10px 12px 12px;
+    background:var(--bg);
   }
 
   .toolbar{
@@ -53,19 +80,25 @@
     align-items:center;
     flex:0 0 auto;
   }
+
   .btn{
     appearance:none;
-    background:#fff;
+    background:var(--card);
     border:1px solid var(--border);
-    color:#111827;
-    padding:7px 11px;
-    border-radius:10px;
+    color:var(--text);
+    padding:9px 13px;
+    border-radius:999px;
     font-weight:900;
     cursor:pointer;
     font-size:clamp(12px, 2.2vw, 14px);
+    box-shadow:0 0 0 1px rgba(200,164,91,.06) inset;
   }
-  .help-btn{ border:2px solid var(--nieuw); color:var(--nieuw); letter-spacing:1px; }
-  .text-btn{ border:2px solid #111827; color:#111827; letter-spacing:1px; }
+
+  .help-btn,
+  .text-btn{
+    color:var(--gold);
+    letter-spacing:1px;
+  }
 
   .groups{
     flex:1 1 auto;
@@ -75,23 +108,26 @@
     gap:10px;
     overflow:hidden;
   }
+
   .group{
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:6px;
+    gap:7px;
   }
 
   .group-label{
     flex:0 0 auto;
-    background:var(--label);
-    border:1px solid var(--border);
-    border-radius:8px;
-    padding:4px 8px;
+    background:var(--card);
+    border:1px solid rgba(200,164,91,.75);
+    border-radius:999px;
+    padding:7px 12px;
     font-weight:1000;
-    letter-spacing:.2px;
-    font-size:clamp(12px, 2.0vw, 14px);
+    letter-spacing:.25px;
+    font-size:clamp(12px, 2vw, 14px);
     line-height:1.1;
+    color:var(--text);
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
   }
 
   .group-grid{
@@ -108,10 +144,11 @@
   }
 
   .table{
-    width:var(--tile); height:var(--tile);
-    border-radius:14px;
+    width:var(--tile);
+    height:var(--tile);
+    border-radius:var(--radius);
     background:var(--card);
-    border:1px solid var(--border);
+    border:1px solid rgba(200,164,91,.85);
     display:grid;
     grid-template-rows:auto 1fr auto;
     align-items:center;
@@ -121,13 +158,26 @@
     position:relative;
     user-select:none;
     cursor:pointer;
+    box-shadow:
+      0 10px 24px rgba(0,0,0,.22),
+      0 0 0 1px rgba(200,164,91,.06) inset;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
   }
+
+  .table:active{
+    transform:scale(.985);
+  }
+
   .num{
     font-weight:1000;
     font-size:calc(var(--tile) * 0.24);
     line-height:1;
+    color:#ffffff; /* wit als nog niet geactiveerd */
   }
-  .num.num-flagged{ color: var(--nieuw); }
+
+  .num.num-flagged{
+    color:var(--gold);
+  }
 
   .note{
     font-weight:700;
@@ -141,6 +191,7 @@
     display:-webkit-box;
     -webkit-line-clamp:2;
     -webkit-box-orient:vertical;
+    color:#ffffff;
   }
 
   .timer{
@@ -150,11 +201,15 @@
     transform:translateX(-50%);
     font-weight:800;
     font-size:calc(var(--tile) * 0.14);
-    color:#475569;
+    color:var(--gold);
     pointer-events:none;
   }
 
-  .table[data-status]{ color:#fff; border-color:transparent; }
+  .table[data-status]{
+    color:#fff;
+    border-color:transparent;
+    box-shadow:0 14px 28px rgba(0,0,0,.28);
+  }
   .table[data-status] .num{ color:#fff !important; }
   .table[data-status] .note{ color:#fff; }
   .table[data-status] .timer{ color:#fff; }
@@ -165,55 +220,72 @@
   .table.status-koffie{ background:var(--koffie); }
   .table.status-rekening{ background:var(--rekening); }
 
-  /* overlays */
   .overlay{
-    position:fixed; inset:0;
-    background:rgba(0,0,0,.6);
-    display:none; align-items:center; justify-content:center;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.74);
+    display:none;
+    align-items:center;
+    justify-content:center;
     padding:16px;
     z-index:2147483647;
+    backdrop-filter:blur(2px);
   }
   .overlay.open{ display:flex; }
 
   .modal{
     width:100%;
     max-width:520px;
-    background:#fff;
-    border:1px solid var(--border);
-    border-radius:16px;
-    box-shadow:0 12px 35px rgba(0,0,0,.28);
+    background:var(--card-2);
+    border:1px solid rgba(200,164,91,.9);
+    border-radius:24px;
+    box-shadow:
+      0 22px 60px rgba(0,0,0,.45),
+      0 0 0 1px rgba(200,164,91,.08) inset;
     overflow:hidden;
   }
+
   .modal-header{
-    padding:12px 14px;
+    padding:14px 16px;
     font-weight:1000;
-    border-bottom:1px solid var(--border);
-    background:#fff;
+    border-bottom:1px solid rgba(200,164,91,.5);
+    background:var(--card-2);
+    color:var(--text);
   }
+
   .modal-grid{
-    padding:12px 14px;
+    padding:14px 16px;
     display:grid;
     gap:10px;
     grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
-    background:#fff;
+    background:var(--card-2);
   }
+
   .choice{
-    border:1px solid var(--border);
-    background:#fff;
-    border-radius:12px;
-    padding:12px;
+    border:1px solid rgba(200,164,91,.8);
+    background:var(--card);
+    color:var(--text);
+    border-radius:18px;
+    padding:13px;
     font-weight:900;
     cursor:pointer;
     display:flex;
     align-items:center;
     justify-content:center;
     gap:10px;
+    min-height:52px;
   }
+
   .choice.reset{
-    border-color:#9ca3af;
-    color:#374151;
+    color:var(--gold);
   }
-  .swatch{ width:16px; height:16px; border-radius:5px; }
+
+  .swatch{
+    width:16px;
+    height:16px;
+    border-radius:5px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.16) inset;
+  }
   .swatch.nieuw{background:var(--nieuw)}
   .swatch.drank{background:var(--drank)}
   .swatch.run{background:var(--run)}
@@ -221,45 +293,60 @@
   .swatch.rekening{background:var(--rekening)}
 
   .modal-footer{
-    padding:10px 12px;
-    border-top:1px solid var(--border);
+    padding:12px 14px;
+    border-top:1px solid rgba(200,164,91,.5);
     display:flex;
     gap:10px;
     justify-content:space-between;
     align-items:center;
-    background:#fff;
+    background:var(--card-2);
   }
+
   .link{
-    border:1px solid var(--border);
-    background:#fff;
-    border-radius:12px;
-    padding:9px 11px;
+    border:1px solid rgba(200,164,91,.8);
+    background:var(--card);
+    color:var(--text);
+    border-radius:999px;
+    padding:10px 13px;
     font-weight:900;
     cursor:pointer;
   }
+
   .link.primary{
-    background:#2563eb;
-    border-color:#2563eb;
-    color:#fff;
+    background:var(--gold);
+    border-color:var(--gold);
+    color:#0b0b0b;
   }
-  .danger{ border-color:#ef4444; color:#ef4444; }
+
+  .danger{
+    color:var(--gold);
+  }
 
   .note-editor{
     display:none;
-    padding:12px 14px;
-    border-top:1px solid var(--border);
-    background:#fff;
+    padding:14px 16px;
+    border-top:1px solid rgba(200,164,91,.45);
+    background:var(--card-2);
   }
   .note-editor.open{ display:block; }
+
   .note-editor textarea{
     width:100%;
-    min-height:90px;
-    padding:12px;
-    border:1px solid var(--border);
-    border-radius:12px;
-    font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    min-height:96px;
+    padding:12px 14px;
+    border:1px solid rgba(200,164,91,.8);
+    border-radius:18px;
+    font:14px/1.4 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     resize:vertical;
+    background:var(--card);
+    color:var(--text);
+    outline:none;
   }
+  .note-editor textarea::placeholder{
+    color:#ffffff;
+    opacity:.6;
+  }
+
   .note-actions{
     display:flex;
     gap:8px;
@@ -267,30 +354,52 @@
     margin-top:10px;
   }
 
-  .menu-header.help{ color:var(--nieuw); }
-  .menu-header.text{ color:#111827; }
+  .menu-header.help,
+  .menu-header.text{
+    color:var(--gold);
+  }
 
-  .input-wrap{ padding:12px 14px; display:grid; gap:10px; }
+  .input-wrap{
+    padding:14px 16px;
+    display:grid;
+    gap:10px;
+    background:var(--card-2);
+  }
+
   .input-wrap input{
     width:100%;
-    padding:12px 12px;
-    border:1px solid var(--border);
-    border-radius:12px;
-    font:16px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    padding:13px 14px;
+    border:1px solid rgba(200,164,91,.8);
+    border-radius:18px;
+    font:16px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--card);
+    color:var(--text);
+    outline:none;
   }
-  .input-hint{ font-size:12px; color:var(--muted); }
+  .input-wrap input::placeholder{
+    color:#ffffff;
+    opacity:.6;
+  }
 
-  /* fullscreen boodschap: alleen tekst */
+  .input-hint{
+    font-size:12px;
+    color:var(--muted);
+  }
+
   .alert-screen{
-    position:fixed; inset:0;
-    background:#fff; color:#000;
+    position:fixed;
+    inset:0;
+    background:var(--bg);
+    color:var(--gold);
     display:none;
-    align-items:center; justify-content:center;
+    align-items:center;
+    justify-content:center;
     z-index:2147483647;
     padding:24px;
     text-align:center;
   }
   .alert-screen.show{ display:flex; }
+
   .alert-only{
     font-size:clamp(36px, 9vw, 96px);
     font-weight:1100;
@@ -298,6 +407,7 @@
     white-space:pre-wrap;
     word-break:break-word;
     max-width:min(1000px, 94vw);
+    text-shadow:0 0 24px rgba(200,164,91,.08);
   }
 </style>
 </head>
@@ -317,7 +427,6 @@
   <div class="groups" id="groups"></div>
 </main>
 
-<!-- Status / Notitie modal -->
 <div id="overlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
     <div class="modal-header">Tafel <span id="modalTableNum"></span></div>
@@ -328,7 +437,7 @@
       <button class="choice" data-choice="run"><span class="swatch run"></span>Run</button>
       <button class="choice" data-choice="koffie"><span class="swatch koffie"></span>Koffie</button>
       <button class="choice" data-choice="rekening"><span class="swatch rekening"></span>Rekening</button>
-      <button class="choice reset" data-choice="resetnum">Reset (rode cijfers)</button>
+      <button class="choice reset" data-choice="resetnum">Reset (gouden cijfers)</button>
     </div>
 
     <div class="note-editor" id="noteEditor">
@@ -347,7 +456,6 @@
   </div>
 </div>
 
-<!-- HELP menu -->
 <div id="helpOverlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
     <div class="modal-header menu-header help">KIES HULPLOCATIE</div>
@@ -360,7 +468,6 @@
   </div>
 </div>
 
-<!-- TEXT menu -->
 <div id="textOverlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
     <div class="modal-header menu-header text">KIES BERICHT</div>
@@ -373,7 +480,6 @@
   </div>
 </div>
 
-<!-- Eigen invoer -->
 <div id="customTextOverlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
     <div class="modal-header">Eigen bericht</div>
@@ -388,22 +494,18 @@
   </div>
 </div>
 
-<!-- Fullscreen broadcast -->
 <div id="alertScreen" class="alert-screen" aria-live="assertive" aria-atomic="true">
   <div id="alertText" class="alert-only"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ===== Supabase ===== */
 const SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJpc3MiLCJyZWYiOiJ4aXdkYnZ4bmpjcmR3amhtcGpuZiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzU0NjYxNTcwLCJleHAiOjIwNzAyMzc1NzB9.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-/* ===== Broadcast protocol ===== */
-const BROADCAST_CLEAR = "__CLEAR__";   // speciale event om op ALLE apparaten de overlay te sluiten
+const BROADCAST_CLEAR = "__CLEAR__";
 
-/* ===== Config ===== */
 const RANGES_BENEDEN = [[1,13]];
 const RANGES_BOVEN   = [[20,58]];
 const GROUPS = [
@@ -422,7 +524,6 @@ const STATUS_CLASSES = {
 function expandRanges(r){ const out=[]; for(const [a,b] of r){ for(let i=a;i<=b;i++) out.push(i);} return out; }
 function keyOf(zone, n){ return `${zone}-${n}`; }
 
-/* ===== Elements ===== */
 const groupsEl = document.getElementById('groups');
 
 const overlay = document.getElementById('overlay');
@@ -455,7 +556,6 @@ const customTextCloseEl = document.getElementById('customTextClose');
 const alertScreenEl = document.getElementById('alertScreen');
 const alertTextEl = document.getElementById('alertText');
 
-/* ===== State ===== */
 let rows = new Map();
 let pendingCell = null;
 let timerInterval = null;
@@ -463,7 +563,6 @@ let tablesChannel = null;
 let eventsChannel = null;
 let alertOpen = false;
 
-/* ===== Data ===== */
 async function fetchAll(){
   const { data, error } = await sb.from('tables_status').select('*');
   if(error){ console.error('fetchAll error', error); return; }
@@ -484,7 +583,6 @@ async function upsertTable(zone, num, patch){
   return data;
 }
 
-/* ===== UI helpers ===== */
 function applyStatus(cell, status){
   cell.classList.remove(...Object.values(STATUS_CLASSES));
   if(status){
@@ -506,7 +604,6 @@ function fmtElapsed(ms){
   return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
-/* ✅ Dynamische gap */
 function applyResponsiveGap(){
   const minSide = Math.min(window.innerWidth, window.innerHeight);
   let gap = Math.round(minSide / 90);
@@ -514,7 +611,6 @@ function applyResponsiveGap(){
   document.documentElement.style.setProperty('--gap', gap + 'px');
 }
 
-/* ✅ Tiles maximaal + hoogte verdelen op rij-aantal */
 function layoutToFit(){
   const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
 
@@ -526,9 +622,9 @@ function layoutToFit(){
   let labelH = 0;
   labels.forEach(l=> labelH += Math.ceil(l.getBoundingClientRect().height));
 
-  const betweenGroups = 10; // match .groups gap
-  const N_b = expandRanges(RANGES_BENEDEN).length; // 13
-  const N_t = expandRanges(RANGES_BOVEN).length;   // 39
+  const betweenGroups = 10;
+  const N_b = expandRanges(RANGES_BENEDEN).length;
+  const N_t = expandRanges(RANGES_BOVEN).length;
 
   let best = null;
 
@@ -576,7 +672,6 @@ function layoutToFit(){
   if(bovenGroup)   bovenGroup.style.flex  = `${best.rt} 1 0%`;
 }
 
-/* ===== Render ===== */
 function render(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   groupsEl.innerHTML = '';
@@ -623,7 +718,6 @@ function render(){
         const cur = rows.get(keyOf(group.zone,n)) || {};
         const hasStatus = !!cur.status || cell.hasAttribute('data-status');
 
-        // 1 klik op gekleurde tafel = leeg (num_marked blijft)
         if(hasStatus){
           const keepFlag = !!cur.num_marked;
           await upsertTable(group.zone, n, { status:null, status_started:null, num_marked: keepFlag });
@@ -664,11 +758,9 @@ function render(){
   layoutToFit();
 }
 
-/* ===== Modal panes ===== */
 function showChoicesPane(){ statusChoices.style.display = 'grid'; noteEditor.classList.remove('open'); }
 function showNotePane(){ statusChoices.style.display = 'none'; noteEditor.classList.add('open'); }
 
-/* ===== Status choices ===== */
 overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
     if(!pendingCell) return;
@@ -696,7 +788,6 @@ overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
   });
 });
 
-/* Note */
 openNoteBtn.addEventListener('click', ()=>{ if(pendingCell) showNotePane(); });
 saveNoteBtn.addEventListener('click', async ()=>{
   if(!pendingCell) return;
@@ -720,7 +811,6 @@ cancelNoteBtn.addEventListener('click', showChoicesPane);
 cancelModalBtn.addEventListener('click', ()=>{ overlay.classList.remove('open'); pendingCell=null; showChoicesPane(); });
 overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingCell=null; showChoicesPane(); }});
 
-/* Reset */
 async function fullResetAll(){
   for(const g of GROUPS){
     for(const n of expandRanges(g.ranges)){
@@ -733,7 +823,6 @@ async function fullResetAll(){
 }
 resetAllBtn.addEventListener('click', fullResetAll);
 
-/* Auto reset 02:00 */
 async function autoDailyResetCheck(){
   const now = new Date();
   const hh = now.getHours(), mm = now.getMinutes();
@@ -744,9 +833,8 @@ async function autoDailyResetCheck(){
     localStorage.setItem('last_auto_reset', todayKey);
   }
 }
-setInterval(autoDailyResetCheck, 60_000);
+setInterval(autoDailyResetCheck, 60000);
 
-/* ===== Broadcast: global close bij 1 tik ===== */
 function hideBroadcastLocal(){
   alertScreenEl.classList.remove('show');
   alertOpen = false;
@@ -761,8 +849,6 @@ function showBroadcastLocal(message){
   alertOpen = true;
 }
 
-/* Wanneer je op 1 scherm tikt, sturen we een CLEAR event naar Supabase,
-   zodat ALLE apparaten de overlay sluiten. */
 async function clearBroadcastGlobal(){
   const { error } = await sb.from('help_events').insert({ kind: BROADCAST_CLEAR });
   if(error) console.error('broadcast clear insert error', error);
@@ -775,14 +861,12 @@ async function sendBroadcast(message){
   if(error) console.error('broadcast insert error', error);
 }
 
-/* Klik op het scherm -> sluit overal */
 alertScreenEl.addEventListener('click', async ()=>{
   if(!alertOpen) return;
-  hideBroadcastLocal();     // meteen lokaal dicht
-  await clearBroadcastGlobal(); // en via realtime bij iedereen
+  hideBroadcastLocal();
+  await clearBroadcastGlobal();
 });
 
-/* HELP */
 helpBtnEl.addEventListener('click', ()=> helpOverlayEl.classList.add('open'));
 helpOverlayEl.addEventListener('click', (e)=>{ if(e.target===helpOverlayEl) helpOverlayEl.classList.remove('open'); });
 helpCancelEl.addEventListener('click', ()=> helpOverlayEl.classList.remove('open'));
@@ -795,7 +879,6 @@ helpOverlayEl.querySelectorAll('[data-broadcast]').forEach(btn=>{
   });
 });
 
-/* TEXT */
 textBtnEl.addEventListener('click', ()=> textOverlayEl.classList.add('open'));
 textOverlayEl.addEventListener('click', (e)=>{ if(e.target===textOverlayEl) textOverlayEl.classList.remove('open'); });
 textCancelEl.addEventListener('click', ()=> textOverlayEl.classList.remove('open'));
@@ -808,12 +891,14 @@ textOverlayEl.querySelectorAll('[data-text]').forEach(btn=>{
     showBroadcastLocal(msg);
   });
 });
+
 openCustomTextEl.addEventListener('click', ()=>{
   textOverlayEl.classList.remove('open');
   customTextInputEl.value = '';
   customTextOverlayEl.classList.add('open');
   setTimeout(()=>customTextInputEl.focus(), 50);
 });
+
 customTextCloseEl.addEventListener('click', ()=> customTextOverlayEl.classList.remove('open'));
 customTextOverlayEl.addEventListener('click', (e)=>{ if(e.target===customTextOverlayEl) customTextOverlayEl.classList.remove('open'); });
 
@@ -827,7 +912,6 @@ async function sendCustom(){
 customTextSendEl.addEventListener('click', sendCustom);
 customTextInputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendCustom(); }});
 
-/* Realtime */
 function subscribeRealtimeTables(){
   if(tablesChannel) sb.removeChannel(tablesChannel);
   tablesChannel = sb.channel('tables_status:all')
@@ -865,7 +949,6 @@ function subscribeBroadcasts(){
     .subscribe();
 }
 
-/* Resize */
 let raf=null;
 function scheduleLayout(){
   if(raf) cancelAnimationFrame(raf);
@@ -878,7 +961,6 @@ function scheduleLayout(){
 window.addEventListener('resize', scheduleLayout);
 window.addEventListener('orientationchange', ()=>setTimeout(()=>{ applyResponsiveGap(); layoutToFit(); }, 60));
 
-/* Init */
 (async function init(){
   await fetchAll();
   render();
