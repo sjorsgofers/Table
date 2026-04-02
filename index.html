@@ -242,10 +242,7 @@
     color:#fff;
   }
 
-  .num.num-flagged{
-    color:var(--gold);
-    text-shadow:0 0 14px rgba(200,164,91,.18);
-  }
+  .num.num-flagged{ color: var(--occupied-num) !important; text-shadow:0 0 12px rgba(200,164,91,.18); }
 
   .note{
     font-weight:700;
@@ -253,11 +250,11 @@
     text-align:center;
     line-height:1.12;
     max-width:100%;
-    max-height:2.0em;
+    max-height:1.55em;
     overflow:hidden;
     text-overflow:ellipsis;
     display:-webkit-box;
-    -webkit-line-clamp:2;
+    -webkit-line-clamp:1;
     -webkit-box-orient:vertical;
     color:#fff;
   }
@@ -283,7 +280,7 @@
   }
   .table[data-status] .num{ color:#fff !important; }
   .table[data-status] .note{ color:#fff; }
-  .table[data-status] .timer{ color:#fff; background:rgba(0,0,0,.32); border-color:rgba(255,255,255,.18); }
+  .table[data-status] .timer{ color:#fff; background:rgba(0,0,0,.82); border-color:rgba(255,255,255,.30); }
 
   .table.status-nieuw{
     background:var(--nieuw);
@@ -722,7 +719,11 @@ function applyStatus(cell, status){
   }
 }
 function setNote(cell, txt){ cell.querySelector('.note').textContent = txt || ''; }
-function setTimer(cell, txt){ cell.querySelector('.timer').textContent = txt || ''; }
+function setTimer(cell, txt){
+  const el = cell.querySelector('.timer');
+  el.textContent = txt || '';
+  el.style.display = txt ? 'block' : 'none';
+}
 function setNumFlag(cell, flagged){ cell.querySelector('.num').classList.toggle('num-flagged', !!flagged); }
 function fmtElapsed(ms){
   const total = Math.max(0, Math.floor(ms/1000));
