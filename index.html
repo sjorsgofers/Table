@@ -688,6 +688,7 @@ let timerInterval = null;
 let tablesChannel = null;
 let eventsChannel = null;
 let alertOpen = false;
+const localStatusStarts = new Map();
 
 async function fetchAll(){
   const { data, error } = await sb.from('tables_status').select('*');
@@ -723,6 +724,7 @@ function setTimer(cell, txt){
   const el = cell.querySelector('.timer');
   el.textContent = txt || '';
   el.style.display = txt ? 'block' : 'none';
+  el.setAttribute('aria-label', txt ? ('Timer ' + txt) : '');
 }
 function setNumFlag(cell, flagged){ cell.querySelector('.num').classList.toggle('num-flagged', !!flagged); }
 function fmtElapsed(ms){
@@ -843,6 +845,9 @@ function render(){
 
     for(const n of nums){
       const r = rows.get(keyOf(group.zone,n)) || {};
+      if(r && r.status && r.status_started){
+        localStatusStarts.set(keyOf(group.zone,n), r.status_started);
+      }
 
       const cell = document.createElement('button');
       cell.type = 'button';
@@ -866,6 +871,7 @@ function render(){
 
         if(hasStatus){
           const keepFlag = !!cur.num_marked;
+          localStatusStarts.delete(keyOf(group.zone,n));
           await upsertTable(group.zone, n, { status:null, status_started:null, num_marked: keepFlag });
           applyStatus(cell, null);
           setTimer(cell, '');
@@ -889,9 +895,12 @@ function render(){
     document.querySelectorAll('.table').forEach(cell=>{
       const zone = cell.dataset.zone;
       const num = Number(cell.dataset.num);
-      const r = rows.get(keyOf(zone,num));
-      if(r && r.status && r.status_started){
-        setTimer(cell, fmtElapsed(now - Date.parse(r.status_started)));
+      const key = keyOf(zone,num);
+      const r = rows.get(key);
+      const started = (r && r.status_started) || localStatusStarts.get(key);
+
+      if(r && r.status && started){
+        setTimer(cell, fmtElapsed(now - Date.parse(started)));
       } else {
         setTimer(cell, '');
       }
@@ -921,12 +930,15 @@ overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
       return;
     }
 
-    const patch = { status: choice, status_started: new Date().toISOString() };
+    const startedNow = new Date().toISOString();
+    const patch = { status: choice, status_started: startedNow };
     if(choice === 'nieuw') patch.num_marked = true;
 
+    localStatusStarts.set(keyOf(zone,num), startedNow);
     await upsertTable(zone, num, patch);
 
     applyStatus(pendingCell, choice);
+    setTimer(pendingCell, '0:00');
     if(choice === 'nieuw') setNumFlag(pendingCell, true);
 
     overlay.classList.remove('open');
@@ -1063,6 +1075,12 @@ function subscribeRealtimeTables(){
       const row = payload.new || payload.old;
       if(!row) return;
       rows.set(keyOf(row.zone,row.table_num), payload.new || row);
+      const syncKey = keyOf(row.zone,row.table_num);
+      if(payload.new && payload.new.status && payload.new.status_started){
+        localStatusStarts.set(syncKey, payload.new.status_started);
+      } else if(payload.new && !payload.new.status){
+        localStatusStarts.delete(syncKey);
+      }
 
       const cell = document.querySelector(`.table[data-zone="${row.zone}"][data-num="${row.table_num}"]`);
       if(cell){
