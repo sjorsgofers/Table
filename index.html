@@ -743,18 +743,24 @@ function applyResponsiveGap(){
 /* Beter passend maken: berekent tegelmaat op basis van de werkelijke hoogte
    van toolbar + labels + veilige marges, zodat geen knoppen buiten beeld vallen. */
 function layoutToFit(){
-  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
+  const rootStyles = getComputedStyle(document.documentElement);
+  const gap = parseInt(rootStyles.getPropertyValue('--gap')) || 8;
 
   const avail = groupsEl.getBoundingClientRect();
   const availW = Math.floor(avail.width);
   const availH = Math.floor(avail.height);
 
-  const labels = [...groupsEl.querySelectorAll('.group-label')];
-  let labelH = 0;
-  labels.forEach(l => { labelH += Math.ceil(l.getBoundingClientRect().height); });
+  const benedenGroup = document.querySelector('.group[data-zone="bt"]');
+  const bovenGroup   = document.querySelector('.group[data-zone="boven"]');
+  const benedenLabel = benedenGroup?.querySelector('.group-label');
+  const bovenLabel   = bovenGroup?.querySelector('.group-label');
 
-  const betweenGroups = 10;
-  const topBottomFudge = 4;
+  const labelGap = 6;      // .group gap
+  const betweenGroups = 10; // .groups gap
+  const innerPad = 2;      // kleine veiligheidsmarge
+
+  const benedenLabelH = benedenLabel ? Math.ceil(benedenLabel.getBoundingClientRect().height) : 0;
+  const bovenLabelH   = bovenLabel ? Math.ceil(bovenLabel.getBoundingClientRect().height) : 0;
 
   const N_b = expandRanges(RANGES_BENEDEN).length;
   const N_t = expandRanges(RANGES_BOVEN).length;
@@ -763,15 +769,15 @@ function layoutToFit(){
 
   for(let cb=1; cb<=N_b; cb++){
     const rb = Math.ceil(N_b / cb);
-    const tileW_b = Math.floor((availW - (cb-1)*gap) / cb);
+    const tileW_b = Math.floor((availW - (cb-1)*gap - innerPad) / cb);
 
     for(let ct=1; ct<=N_t; ct++){
       const rt = Math.ceil(N_t / ct);
-      const tileW_t = Math.floor((availW - (ct-1)*gap) / ct);
+      const tileW_t = Math.floor((availW - (ct-1)*gap - innerPad) / ct);
 
-      const totalRows = rb + rt;
-      const gapsV = ((rb-1) + (rt-1)) * gap + betweenGroups + topBottomFudge;
-      const tileH_limit = Math.floor((availH - labelH - gapsV) / totalRows);
+      const fixedHeights = benedenLabelH + bovenLabelH + labelGap * 2 + betweenGroups + innerPad;
+      const rowGaps = Math.max(0, rb - 1) * gap + Math.max(0, rt - 1) * gap;
+      const tileH_limit = Math.floor((availH - fixedHeights - rowGaps) / (rb + rt));
       const tileW_limit = Math.min(tileW_b, tileW_t);
       const tile = Math.max(0, Math.min(tileH_limit, tileW_limit));
 
@@ -781,13 +787,13 @@ function layoutToFit(){
     }
   }
 
-  if(!best || best.tile < 24){
+  if(!best || best.tile < 22){
     best = {
       cb: 6,
       ct: 10,
       rb: Math.ceil(N_b / 6),
       rt: Math.ceil(N_t / 10),
-      tile: 24
+      tile: 22
     };
   }
 
@@ -798,10 +804,17 @@ function layoutToFit(){
     grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
   });
 
-  const benedenGroup = document.querySelector('.group[data-zone="bt"]');
-  const bovenGroup   = document.querySelector('.group[data-zone="boven"]');
-  if(benedenGroup) benedenGroup.style.flex = `${best.rb} 1 0%`;
-  if(bovenGroup)   bovenGroup.style.flex  = `${best.rt} 1 0%`;
+  const benedenGridH = best.rb * best.tile + Math.max(0, best.rb - 1) * gap + 2;
+  const bovenGridH   = best.rt * best.tile + Math.max(0, best.rt - 1) * gap + 2;
+
+  if(benedenGroup){
+    benedenGroup.style.flex = '0 0 auto';
+    benedenGroup.style.height = `${benedenLabelH + labelGap + benedenGridH}px`;
+  }
+  if(bovenGroup){
+    bovenGroup.style.flex = '0 0 auto';
+    bovenGroup.style.height = `${bovenLabelH + labelGap + bovenGridH}px`;
+  }
 }
 
 function render(){
