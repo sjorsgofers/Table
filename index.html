@@ -8,95 +8,50 @@
 <style>
   :root{
     --bg:#0b0b0b;
-    --panel:#101010;
-    --panel-2:#121212;
+    --card:#121212;
+    --card-2:#161616;
     --text:#ffffff;
-    --muted:rgba(255,255,255,.72);
-    --gold:#c8a45b;
-    --gold-line:rgba(200,164,91,.78);
-    --gold-soft:rgba(200,164,91,.16);
-    --gold-glow:rgba(200,164,91,.28);
+    --muted:#b8b8b8;
 
-    --nieuw:#c8a45b;
+    --nieuw:#ef4444;
     --drank:#f59e0b;
     --run:#10b981;
     --koffie:#7c3aed;
     --rekening:#0ea5e9;
 
-    --gap:10px;
-    --tile:86px;
-    --radius:18px;
+    --border:#c8a45b;
+    --label:#151515;
+
+    --gap:10px;   /* dynamisch in JS */
+    --tile:86px;  /* dynamisch in JS */
   }
 
   *{box-sizing:border-box}
   html,body{height:100%}
-
   body{
     margin:0;
-    background:
-      radial-gradient(circle at top, rgba(200,164,91,.06), transparent 32%),
-      linear-gradient(180deg, #0c0c0c 0%, #0b0b0b 100%);
+    background:var(--bg);
     color:var(--text);
-    font:16px/1.35 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    font:16px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     display:flex;
     flex-direction:column;
     min-height:100vh;
-    overflow:hidden;
   }
 
   header{
-    flex:0 0 auto;
-    padding:
-      max(12px, env(safe-area-inset-top))
-      clamp(12px, 2vw, 20px)
-      12px;
-    background:
-      linear-gradient(180deg, rgba(200,164,91,.08), rgba(200,164,91,.02)),
-      rgba(12,12,12,.94);
-    border-bottom:1px solid rgba(200,164,91,.42);
-    box-shadow:
-      0 10px 30px rgba(0,0,0,.34),
-      0 1px 0 rgba(255,255,255,.02) inset;
-  }
-
-  .header-bar{
-    max-width:1500px;
-    margin:0 auto;
+    background:linear-gradient(180deg, #171717 0%, #101010 100%);
+    border-bottom:1px solid var(--border);
+    padding:8px 12px;
     display:flex;
     align-items:center;
-    gap:12px;
-  }
-
-  .brand-dot{
-    width:12px;
-    height:12px;
-    border-radius:999px;
-    background:var(--gold);
-    box-shadow:0 0 18px rgba(200,164,91,.45);
+    gap:10px;
     flex:0 0 auto;
-  }
-
-  .title-wrap{
-    min-width:0;
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-  }
-
-  .eyebrow{
-    font-size:11px;
-    letter-spacing:.18em;
-    text-transform:uppercase;
-    color:rgba(200,164,91,.95);
-    font-weight:800;
   }
 
   .title{
-    font-weight:1000;
-    font-size:clamp(16px, 2.2vw, 22px);
-    line-height:1.05;
-    letter-spacing:.01em;
+    font-weight:900;
+    font-size:clamp(14px, 2.4vw, 19px);
+    flex:1;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
@@ -108,11 +63,8 @@
     min-height:0;
     display:flex;
     flex-direction:column;
-    gap:10px;
-    padding:10px clamp(10px, 1.8vw, 18px) clamp(12px, 2vh, 18px);
-    width:100%;
-    max-width:1500px;
-    margin:0 auto;
+    gap:8px;
+    padding:8px 12px 12px;
   }
 
   .toolbar{
@@ -125,33 +77,26 @@
 
   .btn{
     appearance:none;
-    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)), var(--panel);
-    border:1px solid var(--gold-line);
+    background:var(--card);
+    border:1px solid var(--border);
     color:var(--text);
-    padding:9px 13px;
-    border-radius:999px;
+    padding:7px 11px;
+    border-radius:10px;
     font-weight:900;
     cursor:pointer;
-    font-size:clamp(12px, 1.5vw, 14px);
-    min-height:42px;
-    box-shadow:
-      0 0 0 1px rgba(200,164,91,.05) inset,
-      0 8px 22px rgba(0,0,0,.22);
-    transition:transform .12s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
-  }
-  .btn:hover{
-    box-shadow:
-      0 0 0 1px rgba(200,164,91,.07) inset,
-      0 10px 24px rgba(0,0,0,.26);
-  }
-  .btn:active{
-    transform:translateY(1px);
+    font-size:clamp(12px, 2.2vw, 14px);
   }
 
-  .help-btn,
+  .help-btn{
+    border:2px solid var(--border);
+    color:var(--border);
+    letter-spacing:1px;
+  }
+
   .text-btn{
-    color:var(--gold);
-    letter-spacing:.08em;
+    border:2px solid var(--border);
+    color:var(--border);
+    letter-spacing:1px;
   }
 
   .groups{
@@ -172,18 +117,15 @@
 
   .group-label{
     flex:0 0 auto;
-    background:linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0)), var(--panel);
-    border:1px solid rgba(200,164,91,.72);
-    border-radius:999px;
-    padding:7px 12px;
+    background:var(--label);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:4px 8px;
     font-weight:1000;
-    letter-spacing:.03em;
-    font-size:clamp(12px, 1.5vw, 14px);
+    letter-spacing:.2px;
+    font-size:clamp(12px, 2.0vw, 14px);
     line-height:1.1;
-    color:var(--text);
-    box-shadow:
-      0 8px 24px rgba(0,0,0,.16),
-      0 0 0 1px rgba(200,164,91,.05) inset;
+    color:var(--border);
   }
 
   .group-grid{
@@ -197,17 +139,14 @@
     flex:1 1 auto;
     min-height:0;
     overflow:hidden;
-    padding:1px;
   }
 
   .table{
     width:var(--tile);
     height:var(--tile);
-    border-radius:var(--radius);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-      var(--panel);
-    border:1px solid var(--gold-line);
+    border-radius:14px;
+    background:var(--card);
+    border:1px solid var(--border);
     display:grid;
     grid-template-rows:auto 1fr auto;
     align-items:center;
@@ -217,32 +156,16 @@
     position:relative;
     user-select:none;
     cursor:pointer;
-    box-shadow:
-      0 12px 28px rgba(0,0,0,.22),
-      0 0 0 1px rgba(200,164,91,.06) inset;
-    transition:
-      transform .12s ease,
-      box-shadow .16s ease,
-      border-color .16s ease,
-      filter .16s ease;
-  }
-  .table:hover{
-    box-shadow:
-      0 14px 30px rgba(0,0,0,.28),
-      0 0 0 1px rgba(200,164,91,.08) inset;
-  }
-  .table:active{
-    transform:scale(.985);
   }
 
   .num{
     font-weight:1000;
     font-size:calc(var(--tile) * 0.24);
     line-height:1;
-    color:#fff;
+    color:#ffffff;
   }
 
-  .num.num-flagged{ color: var(--occupied-num) !important; text-shadow:0 0 12px rgba(200,164,91,.18); }
+  .num.num-flagged{ color: var(--nieuw); }
 
   .note{
     font-weight:700;
@@ -250,13 +173,13 @@
     text-align:center;
     line-height:1.12;
     max-width:100%;
-    max-height:1.55em;
+    max-height:2.3em;
     overflow:hidden;
     text-overflow:ellipsis;
     display:-webkit-box;
-    -webkit-line-clamp:1;
+    -webkit-line-clamp:2;
     -webkit-box-orient:vertical;
-    color:#fff;
+    color:#ffffff;
   }
 
   .timer{
@@ -266,133 +189,81 @@
     transform:translateX(-50%);
     font-weight:800;
     font-size:calc(var(--tile) * 0.14);
-    color:var(--gold);
+    color:#ffffff;
     pointer-events:none;
-    white-space:nowrap;
   }
 
-  .table[data-status]{
-    color:#fff;
-    border-color:transparent;
-    box-shadow:
-      0 12px 28px rgba(0,0,0,.28),
-      0 0 22px rgba(255,255,255,.06);
-  }
+  .table[data-status]{ color:#fff; border-color:transparent; }
   .table[data-status] .num{ color:#fff !important; }
   .table[data-status] .note{ color:#fff; }
-  .table[data-status] .timer{ color:#fff; background:rgba(0,0,0,.82); border-color:rgba(255,255,255,.30); }
+  .table[data-status] .timer{ color:#fff; }
 
-  .table.status-nieuw{
-    background:var(--nieuw);
-    box-shadow:
-      0 12px 28px rgba(0,0,0,.30),
-      0 0 22px var(--gold-glow);
-  }
-  .table.status-drank{
-    background:var(--drank);
-    box-shadow:
-      0 12px 28px rgba(0,0,0,.30),
-      0 0 20px rgba(245,158,11,.22);
-  }
-  .table.status-run{
-    background:var(--run);
-    box-shadow:
-      0 12px 28px rgba(0,0,0,.30),
-      0 0 20px rgba(16,185,129,.22);
-  }
-  .table.status-koffie{
-    background:var(--koffie);
-    box-shadow:
-      0 12px 28px rgba(0,0,0,.30),
-      0 0 20px rgba(124,58,237,.22);
-  }
-  .table.status-rekening{
-    background:var(--rekening);
-    box-shadow:
-      0 12px 28px rgba(0,0,0,.30),
-      0 0 20px rgba(14,165,233,.22);
-  }
+  .table.status-nieuw{ background:var(--nieuw); }
+  .table.status-drank{ background:var(--drank); }
+  .table.status-run{ background:var(--run); }
+  .table.status-koffie{ background:var(--koffie); }
+  .table.status-rekening{ background:var(--rekening); }
 
+  /* overlays */
   .overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.74);
+    background:rgba(0,0,0,.72);
     display:none;
     align-items:center;
     justify-content:center;
-    padding:14px;
+    padding:16px;
     z-index:2147483647;
-    backdrop-filter:blur(4px);
   }
+
   .overlay.open{ display:flex; }
 
   .modal{
     width:100%;
-    max-width:460px;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-      var(--panel-2);
-    border:1px solid rgba(200,164,91,.9);
-    border-radius:22px;
-    box-shadow:
-      0 24px 64px rgba(0,0,0,.48),
-      0 0 0 1px rgba(200,164,91,.08) inset;
+    max-width:520px;
+    background:var(--card-2);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:0 12px 35px rgba(0,0,0,.45);
     overflow:hidden;
   }
 
   .modal-header{
-    padding:11px 14px;
+    padding:12px 14px;
     font-weight:1000;
-    border-bottom:1px solid rgba(200,164,91,.42);
-    background:rgba(255,255,255,.01);
+    border-bottom:1px solid var(--border);
+    background:var(--card);
     color:var(--text);
-    font-size:15px;
   }
 
   .modal-grid{
     padding:12px 14px;
     display:grid;
-    gap:8px;
-    grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
-    background:transparent;
+    gap:10px;
+    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    background:var(--card-2);
   }
 
   .choice{
-    border:1px solid rgba(200,164,91,.74);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-      var(--panel);
-    color:var(--text);
-    border-radius:15px;
-    padding:11px 12px;
+    border:1px solid var(--border);
+    background:var(--card);
+    border-radius:12px;
+    padding:12px;
     font-weight:900;
     cursor:pointer;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:9px;
-    min-height:46px;
-    box-shadow:0 8px 18px rgba(0,0,0,.18);
-    transition:box-shadow .16s ease, transform .12s ease, border-color .16s ease;
-  }
-  .choice:hover{
-    box-shadow:0 10px 22px rgba(0,0,0,.24);
-  }
-  .choice:active{
-    transform:translateY(1px);
+    gap:10px;
+    color:var(--text);
   }
 
   .choice.reset{
-    color:var(--gold);
+    border-color:var(--border);
+    color:var(--border);
   }
 
-  .swatch{
-    width:14px;
-    height:14px;
-    border-radius:5px;
-    box-shadow:0 0 0 1px rgba(255,255,255,.16) inset;
-    flex:0 0 auto;
-  }
+  .swatch{ width:16px; height:16px; border-radius:5px; }
   .swatch.nieuw{background:var(--nieuw)}
   .swatch.drank{background:var(--drank)}
   .swatch.run{background:var(--run)}
@@ -400,110 +271,100 @@
   .swatch.rekening{background:var(--rekening)}
 
   .modal-footer{
-    padding:10px 12px 12px;
-    border-top:1px solid rgba(200,164,91,.38);
+    padding:10px 12px;
+    border-top:1px solid var(--border);
     display:flex;
-    gap:8px;
+    gap:10px;
     justify-content:space-between;
     align-items:center;
-    background:transparent;
+    background:var(--card);
   }
 
   .link{
-    border:1px solid rgba(200,164,91,.74);
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.018), rgba(255,255,255,0)),
-      var(--panel);
-    color:var(--text);
-    border-radius:999px;
-    padding:9px 12px;
+    border:1px solid var(--border);
+    background:var(--card);
+    border-radius:12px;
+    padding:9px 11px;
     font-weight:900;
     cursor:pointer;
-    min-height:40px;
-    box-shadow:0 8px 18px rgba(0,0,0,.18);
+    color:var(--text);
   }
 
   .link.primary{
-    background:var(--gold);
-    border-color:var(--gold);
+    background:var(--border);
+    border-color:var(--border);
     color:#0b0b0b;
-    box-shadow:
-      0 10px 24px rgba(0,0,0,.22),
-      0 0 18px rgba(200,164,91,.22);
   }
 
   .danger{
-    color:var(--gold);
+    border-color:#ef4444;
+    color:#ef4444;
   }
 
   .note-editor{
     display:none;
     padding:12px 14px;
-    border-top:1px solid rgba(200,164,91,.35);
-    background:transparent;
+    border-top:1px solid var(--border);
+    background:var(--card-2);
   }
+
   .note-editor.open{ display:block; }
 
   .note-editor textarea{
     width:100%;
-    min-height:84px;
-    padding:11px 13px;
-    border:1px solid rgba(200,164,91,.78);
-    border-radius:15px;
-    font:14px/1.4 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    min-height:90px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     resize:vertical;
-    background:var(--panel);
+    background:var(--card);
     color:var(--text);
-    outline:none;
   }
+
   .note-editor textarea::placeholder,
   .input-wrap input::placeholder{
-    color:#fff;
-    opacity:.58;
+    color:var(--muted);
   }
 
   .note-actions{
     display:flex;
     gap:8px;
     justify-content:flex-end;
-    margin-top:9px;
-    flex-wrap:wrap;
+    margin-top:10px;
   }
 
-  .menu-header.help,
-  .menu-header.text{
-    color:var(--gold);
-  }
+  .menu-header.help{ color:var(--border); }
+  .menu-header.text{ color:var(--border); }
 
   .input-wrap{
     padding:12px 14px;
     display:grid;
-    gap:8px;
-    background:transparent;
+    gap:10px;
+    background:var(--card-2);
   }
 
   .input-wrap input{
     width:100%;
-    padding:12px 13px;
-    border:1px solid rgba(200,164,91,.78);
-    border-radius:15px;
-    font:16px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    background:var(--panel);
+    padding:12px 12px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    font:16px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--card);
     color:var(--text);
-    outline:none;
   }
 
   .input-hint{
     font-size:12px;
     color:var(--muted);
-    line-height:1.35;
   }
 
+  /* fullscreen boodschap: alleen tekst */
   .alert-screen{
     position:fixed;
     inset:0;
-    background:rgba(11,11,11,.985);
-    color:var(--gold);
+    background:#0b0b0b;
+    color:#ffffff;
     display:none;
     align-items:center;
     justify-content:center;
@@ -511,6 +372,7 @@
     padding:24px;
     text-align:center;
   }
+
   .alert-screen.show{ display:flex; }
 
   .alert-only{
@@ -520,27 +382,14 @@
     white-space:pre-wrap;
     word-break:break-word;
     max-width:min(1000px, 94vw);
-    text-shadow:0 0 24px rgba(200,164,91,.10);
-  }
-
-  @media (max-width: 900px){
-    header{ padding-bottom:10px; }
-    main{ gap:8px; padding-top:8px; }
-    .group{ gap:5px; }
-    .modal{ max-width:430px; }
+    color:var(--border);
   }
 </style>
 </head>
 
 <body>
 <header>
-  <div class="header-bar">
-    <div class="brand-dot"></div>
-    <div class="title-wrap">
-      <div class="eyebrow">Zusje stijl</div>
-      <div class="title">Tafeloverzicht</div>
-    </div>
-  </div>
+  <div class="title">Tafeloverzicht</div>
 </header>
 
 <main>
@@ -553,6 +402,7 @@
   <div class="groups" id="groups"></div>
 </main>
 
+<!-- Status / Notitie modal -->
 <div id="overlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
     <div class="modal-header">Tafel <span id="modalTableNum"></span></div>
@@ -563,7 +413,7 @@
       <button class="choice" data-choice="run"><span class="swatch run"></span>Run</button>
       <button class="choice" data-choice="koffie"><span class="swatch koffie"></span>Koffie</button>
       <button class="choice" data-choice="rekening"><span class="swatch rekening"></span>Rekening</button>
-      <button class="choice reset" data-choice="resetnum">Reset cijfers</button>
+      <button class="choice reset" data-choice="resetnum">Reset (rode cijfers)</button>
     </div>
 
     <div class="note-editor" id="noteEditor">
@@ -577,11 +427,12 @@
 
     <div class="modal-footer">
       <button class="link" id="cancelModal">Sluiten</button>
-      <button class="link primary" id="openNote">Notitie</button>
+      <button class="link primary" id="openNote">Notitie toevoegen/bewerken</button>
     </div>
   </div>
 </div>
 
+<!-- HELP menu -->
 <div id="helpOverlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
     <div class="modal-header menu-header help">KIES HULPLOCATIE</div>
@@ -594,6 +445,7 @@
   </div>
 </div>
 
+<!-- TEXT menu -->
 <div id="textOverlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
     <div class="modal-header menu-header text">KIES BERICHT</div>
@@ -606,6 +458,7 @@
   </div>
 </div>
 
+<!-- Eigen invoer -->
 <div id="customTextOverlay" class="overlay" aria-modal="true" role="dialog">
   <div class="modal">
     <div class="modal-header">Eigen bericht</div>
@@ -620,18 +473,22 @@
   </div>
 </div>
 
+<!-- Fullscreen broadcast -->
 <div id="alertScreen" class="alert-screen" aria-live="assertive" aria-atomic="true">
   <div id="alertText" class="alert-only"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ===== Supabase ===== */
 const SUPABASE_URL  = "https://xiwdbvxnjcrdwjhmpjnf.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3hpd2RidnhuamNyZHdqaG1wam5mLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJyZWYiOiJ4aXdkYnZ4bmpjcmR3amhtcGpuZiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzU0NjYxNTcwLCJleHAiOjIwNzAyMzc1NzB9.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2RidnhuamNyZHdqaG1wam5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjE1NzAsImV4cCI6MjA3MDIzNzU3MH0.d14QNY5Pof9j3zmlbs-5gBTs25s6xo_XYhyVbWE2P1k";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const BROADCAST_CLEAR = "__CLEAR__";
+/* ===== Broadcast protocol ===== */
+const BROADCAST_CLEAR = "__CLEAR__";   // speciale event om op ALLE apparaten de overlay te sluiten
 
+/* ===== Config ===== */
 const RANGES_BENEDEN = [[1,13]];
 const RANGES_BOVEN   = [[20,58]];
 const GROUPS = [
@@ -650,6 +507,7 @@ const STATUS_CLASSES = {
 function expandRanges(r){ const out=[]; for(const [a,b] of r){ for(let i=a;i<=b;i++) out.push(i);} return out; }
 function keyOf(zone, n){ return `${zone}-${n}`; }
 
+/* ===== Elements ===== */
 const groupsEl = document.getElementById('groups');
 
 const overlay = document.getElementById('overlay');
@@ -682,14 +540,15 @@ const customTextCloseEl = document.getElementById('customTextClose');
 const alertScreenEl = document.getElementById('alertScreen');
 const alertTextEl = document.getElementById('alertText');
 
+/* ===== State ===== */
 let rows = new Map();
 let pendingCell = null;
 let timerInterval = null;
 let tablesChannel = null;
 let eventsChannel = null;
 let alertOpen = false;
-const localStatusStarts = new Map();
 
+/* ===== Data ===== */
 async function fetchAll(){
   const { data, error } = await sb.from('tables_status').select('*');
   if(error){ console.error('fetchAll error', error); return; }
@@ -710,6 +569,7 @@ async function upsertTable(zone, num, patch){
   return data;
 }
 
+/* ===== UI helpers ===== */
 function applyStatus(cell, status){
   cell.classList.remove(...Object.values(STATUS_CLASSES));
   if(status){
@@ -720,12 +580,7 @@ function applyStatus(cell, status){
   }
 }
 function setNote(cell, txt){ cell.querySelector('.note').textContent = txt || ''; }
-function setTimer(cell, txt){
-  const el = cell.querySelector('.timer');
-  el.textContent = txt || '';
-  el.style.display = txt ? 'block' : 'none';
-  el.setAttribute('aria-label', txt ? ('Timer ' + txt) : '');
-}
+function setTimer(cell, txt){ cell.querySelector('.timer').textContent = txt || ''; }
 function setNumFlag(cell, flagged){ cell.querySelector('.num').classList.toggle('num-flagged', !!flagged); }
 function fmtElapsed(ms){
   const total = Math.max(0, Math.floor(ms/1000));
@@ -736,51 +591,44 @@ function fmtElapsed(ms){
   return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
+/* ✅ Dynamische gap */
 function applyResponsiveGap(){
   const minSide = Math.min(window.innerWidth, window.innerHeight);
-  let gap = Math.round(minSide / 105);
-  gap = Math.max(5, Math.min(11, gap));
+  let gap = Math.round(minSide / 90);
+  gap = Math.max(5, Math.min(12, gap));
   document.documentElement.style.setProperty('--gap', gap + 'px');
 }
 
-/* Beter passend maken: berekent tegelmaat op basis van de werkelijke hoogte
-   van toolbar + labels + veilige marges, zodat geen knoppen buiten beeld vallen. */
+/* ✅ Tiles maximaal + hoogte verdelen op rij-aantal */
 function layoutToFit(){
-  const rootStyles = getComputedStyle(document.documentElement);
-  const gap = parseInt(rootStyles.getPropertyValue('--gap')) || 8;
+  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
 
   const avail = groupsEl.getBoundingClientRect();
   const availW = Math.floor(avail.width);
   const availH = Math.floor(avail.height);
 
-  const benedenGroup = document.querySelector('.group[data-zone="bt"]');
-  const bovenGroup   = document.querySelector('.group[data-zone="boven"]');
-  const benedenLabel = benedenGroup?.querySelector('.group-label');
-  const bovenLabel   = bovenGroup?.querySelector('.group-label');
+  const labels = groupsEl.querySelectorAll('.group-label');
+  let labelH = 0;
+  labels.forEach(l=> labelH += Math.ceil(l.getBoundingClientRect().height));
 
-  const labelGap = 6;      // .group gap
-  const betweenGroups = 10; // .groups gap
-  const innerPad = 2;      // kleine veiligheidsmarge
-
-  const benedenLabelH = benedenLabel ? Math.ceil(benedenLabel.getBoundingClientRect().height) : 0;
-  const bovenLabelH   = bovenLabel ? Math.ceil(bovenLabel.getBoundingClientRect().height) : 0;
-
-  const N_b = expandRanges(RANGES_BENEDEN).length;
-  const N_t = expandRanges(RANGES_BOVEN).length;
+  const betweenGroups = 10; // match .groups gap
+  const N_b = expandRanges(RANGES_BENEDEN).length; // 13
+  const N_t = expandRanges(RANGES_BOVEN).length;   // 39
 
   let best = null;
 
   for(let cb=1; cb<=N_b; cb++){
     const rb = Math.ceil(N_b / cb);
-    const tileW_b = Math.floor((availW - (cb-1)*gap - innerPad) / cb);
+    const tileW_b = Math.floor((availW - (cb-1)*gap) / cb);
 
     for(let ct=1; ct<=N_t; ct++){
       const rt = Math.ceil(N_t / ct);
-      const tileW_t = Math.floor((availW - (ct-1)*gap - innerPad) / ct);
+      const tileW_t = Math.floor((availW - (ct-1)*gap) / ct);
 
-      const fixedHeights = benedenLabelH + bovenLabelH + labelGap * 2 + betweenGroups + innerPad;
-      const rowGaps = Math.max(0, rb - 1) * gap + Math.max(0, rt - 1) * gap;
-      const tileH_limit = Math.floor((availH - fixedHeights - rowGaps) / (rb + rt));
+      const totalRows = rb + rt;
+      const gapsV = (rb-1 + rt-1) * gap + betweenGroups;
+
+      const tileH_limit = Math.floor((availH - labelH - gapsV) / totalRows);
       const tileW_limit = Math.min(tileW_b, tileW_t);
       const tile = Math.max(0, Math.min(tileH_limit, tileW_limit));
 
@@ -790,13 +638,13 @@ function layoutToFit(){
     }
   }
 
-  if(!best || best.tile < 22){
+  if(!best || best.tile < 26){
     best = {
       cb: 6,
       ct: 10,
       rb: Math.ceil(N_b / 6),
       rt: Math.ceil(N_t / 10),
-      tile: 22
+      tile: 26
     };
   }
 
@@ -807,19 +655,13 @@ function layoutToFit(){
     grid.style.setProperty('--cols', (zone === 'bt') ? best.cb : best.ct);
   });
 
-  const benedenGridH = best.rb * best.tile + Math.max(0, best.rb - 1) * gap + 2;
-  const bovenGridH   = best.rt * best.tile + Math.max(0, best.rt - 1) * gap + 2;
-
-  if(benedenGroup){
-    benedenGroup.style.flex = '0 0 auto';
-    benedenGroup.style.height = `${benedenLabelH + labelGap + benedenGridH}px`;
-  }
-  if(bovenGroup){
-    bovenGroup.style.flex = '0 0 auto';
-    bovenGroup.style.height = `${bovenLabelH + labelGap + bovenGridH}px`;
-  }
+  const benedenGroup = document.querySelector('.group[data-zone="bt"]');
+  const bovenGroup   = document.querySelector('.group[data-zone="boven"]');
+  if(benedenGroup) benedenGroup.style.flex = `${best.rb} 1 0%`;
+  if(bovenGroup)   bovenGroup.style.flex  = `${best.rt} 1 0%`;
 }
 
+/* ===== Render ===== */
 function render(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   groupsEl.innerHTML = '';
@@ -845,9 +687,6 @@ function render(){
 
     for(const n of nums){
       const r = rows.get(keyOf(group.zone,n)) || {};
-      if(r && r.status && r.status_started){
-        localStatusStarts.set(keyOf(group.zone,n), r.status_started);
-      }
 
       const cell = document.createElement('button');
       cell.type = 'button';
@@ -869,9 +708,9 @@ function render(){
         const cur = rows.get(keyOf(group.zone,n)) || {};
         const hasStatus = !!cur.status || cell.hasAttribute('data-status');
 
+        // 1 klik op gekleurde tafel = leeg (num_marked blijft)
         if(hasStatus){
           const keepFlag = !!cur.num_marked;
-          localStatusStarts.delete(keyOf(group.zone,n));
           await upsertTable(group.zone, n, { status:null, status_started:null, num_marked: keepFlag });
           applyStatus(cell, null);
           setTimer(cell, '');
@@ -895,12 +734,9 @@ function render(){
     document.querySelectorAll('.table').forEach(cell=>{
       const zone = cell.dataset.zone;
       const num = Number(cell.dataset.num);
-      const key = keyOf(zone,num);
-      const r = rows.get(key);
-      const started = (r && r.status_started) || localStatusStarts.get(key);
-
-      if(r && r.status && started){
-        setTimer(cell, fmtElapsed(now - Date.parse(started)));
+      const r = rows.get(keyOf(zone,num));
+      if(r && r.status && r.status_started){
+        setTimer(cell, fmtElapsed(now - Date.parse(r.status_started)));
       } else {
         setTimer(cell, '');
       }
@@ -910,12 +746,14 @@ function render(){
   timerInterval = setInterval(tick, 1000);
 
   applyResponsiveGap();
-  requestAnimationFrame(layoutToFit);
+  layoutToFit();
 }
 
+/* ===== Modal panes ===== */
 function showChoicesPane(){ statusChoices.style.display = 'grid'; noteEditor.classList.remove('open'); }
 function showNotePane(){ statusChoices.style.display = 'none'; noteEditor.classList.add('open'); }
 
+/* ===== Status choices ===== */
 overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
   btn.addEventListener('click', async ()=>{
     if(!pendingCell) return;
@@ -930,15 +768,12 @@ overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
       return;
     }
 
-    const startedNow = new Date().toISOString();
-    const patch = { status: choice, status_started: startedNow };
+    const patch = { status: choice, status_started: new Date().toISOString() };
     if(choice === 'nieuw') patch.num_marked = true;
 
-    localStatusStarts.set(keyOf(zone,num), startedNow);
     await upsertTable(zone, num, patch);
 
     applyStatus(pendingCell, choice);
-    setTimer(pendingCell, '0:00');
     if(choice === 'nieuw') setNumFlag(pendingCell, true);
 
     overlay.classList.remove('open');
@@ -946,6 +781,7 @@ overlay.querySelectorAll('.choice[data-choice]').forEach(btn=>{
   });
 });
 
+/* Note */
 openNoteBtn.addEventListener('click', ()=>{ if(pendingCell) showNotePane(); });
 saveNoteBtn.addEventListener('click', async ()=>{
   if(!pendingCell) return;
@@ -969,6 +805,7 @@ cancelNoteBtn.addEventListener('click', showChoicesPane);
 cancelModalBtn.addEventListener('click', ()=>{ overlay.classList.remove('open'); pendingCell=null; showChoicesPane(); });
 overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ overlay.classList.remove('open'); pendingCell=null; showChoicesPane(); }});
 
+/* Reset */
 async function fullResetAll(){
   for(const g of GROUPS){
     for(const n of expandRanges(g.ranges)){
@@ -981,6 +818,7 @@ async function fullResetAll(){
 }
 resetAllBtn.addEventListener('click', fullResetAll);
 
+/* Auto reset 02:00 */
 async function autoDailyResetCheck(){
   const now = new Date();
   const hh = now.getHours(), mm = now.getMinutes();
@@ -991,8 +829,9 @@ async function autoDailyResetCheck(){
     localStorage.setItem('last_auto_reset', todayKey);
   }
 }
-setInterval(autoDailyResetCheck, 60000);
+setInterval(autoDailyResetCheck, 60_000);
 
+/* ===== Broadcast: global close bij 1 tik ===== */
 function hideBroadcastLocal(){
   alertScreenEl.classList.remove('show');
   alertOpen = false;
@@ -1001,11 +840,14 @@ function hideBroadcastLocal(){
 function showBroadcastLocal(message){
   const msg = (message || '').toString().trim();
   if(!msg) return;
+
   alertTextEl.textContent = msg;
   alertScreenEl.classList.add('show');
   alertOpen = true;
 }
 
+/* Wanneer je op 1 scherm tikt, sturen we een CLEAR event naar Supabase,
+   zodat ALLE apparaten de overlay sluiten. */
 async function clearBroadcastGlobal(){
   const { error } = await sb.from('help_events').insert({ kind: BROADCAST_CLEAR });
   if(error) console.error('broadcast clear insert error', error);
@@ -1018,12 +860,14 @@ async function sendBroadcast(message){
   if(error) console.error('broadcast insert error', error);
 }
 
+/* Klik op het scherm -> sluit overal */
 alertScreenEl.addEventListener('click', async ()=>{
   if(!alertOpen) return;
-  hideBroadcastLocal();
-  await clearBroadcastGlobal();
+  hideBroadcastLocal();     // meteen lokaal dicht
+  await clearBroadcastGlobal(); // en via realtime bij iedereen
 });
 
+/* HELP */
 helpBtnEl.addEventListener('click', ()=> helpOverlayEl.classList.add('open'));
 helpOverlayEl.addEventListener('click', (e)=>{ if(e.target===helpOverlayEl) helpOverlayEl.classList.remove('open'); });
 helpCancelEl.addEventListener('click', ()=> helpOverlayEl.classList.remove('open'));
@@ -1036,6 +880,7 @@ helpOverlayEl.querySelectorAll('[data-broadcast]').forEach(btn=>{
   });
 });
 
+/* TEXT */
 textBtnEl.addEventListener('click', ()=> textOverlayEl.classList.add('open'));
 textOverlayEl.addEventListener('click', (e)=>{ if(e.target===textOverlayEl) textOverlayEl.classList.remove('open'); });
 textCancelEl.addEventListener('click', ()=> textOverlayEl.classList.remove('open'));
@@ -1048,7 +893,6 @@ textOverlayEl.querySelectorAll('[data-text]').forEach(btn=>{
     showBroadcastLocal(msg);
   });
 });
-
 openCustomTextEl.addEventListener('click', ()=>{
   textOverlayEl.classList.remove('open');
   customTextInputEl.value = '';
@@ -1068,6 +912,7 @@ async function sendCustom(){
 customTextSendEl.addEventListener('click', sendCustom);
 customTextInputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendCustom(); }});
 
+/* Realtime */
 function subscribeRealtimeTables(){
   if(tablesChannel) sb.removeChannel(tablesChannel);
   tablesChannel = sb.channel('tables_status:all')
@@ -1075,12 +920,6 @@ function subscribeRealtimeTables(){
       const row = payload.new || payload.old;
       if(!row) return;
       rows.set(keyOf(row.zone,row.table_num), payload.new || row);
-      const syncKey = keyOf(row.zone,row.table_num);
-      if(payload.new && payload.new.status && payload.new.status_started){
-        localStatusStarts.set(syncKey, payload.new.status_started);
-      } else if(payload.new && !payload.new.status){
-        localStatusStarts.delete(syncKey);
-      }
 
       const cell = document.querySelector(`.table[data-zone="${row.zone}"][data-num="${row.table_num}"]`);
       if(cell){
@@ -1111,6 +950,7 @@ function subscribeBroadcasts(){
     .subscribe();
 }
 
+/* Resize */
 let raf=null;
 function scheduleLayout(){
   if(raf) cancelAnimationFrame(raf);
@@ -1121,15 +961,17 @@ function scheduleLayout(){
   });
 }
 window.addEventListener('resize', scheduleLayout);
-window.addEventListener('orientationchange', ()=>setTimeout(scheduleLayout, 80));
+window.addEventListener('orientationchange', ()=>setTimeout(()=>{ applyResponsiveGap(); layoutToFit(); }, 60));
 
+/* Init */
 (async function init(){
   await fetchAll();
   render();
   subscribeRealtimeTables();
   subscribeBroadcasts();
   autoDailyResetCheck();
-  scheduleLayout();
+  applyResponsiveGap();
+  layoutToFit();
 })();
 </script>
 </body>
