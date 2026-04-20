@@ -1946,24 +1946,24 @@ async function setArrivalState(res, state){
   }
   Object.assign(res, patch);
 
-  // Tafels syncen alleen bij overgang pending <-> (partial/complete)
-  const wasActive = prev !== 'pending';
-  const isActive  = state !== 'pending';
-  if(wasActive !== isActive){
-    for(const n of (res.table_nums||[])){
-      const z = inferZone(n) || res.zone;
-      if(!z) continue;
-      if(isActive){
-        await upsertTable(z, n, { status:'nieuw', status_started:now, num_marked:true });
-      } else {
-        await upsertTable(z, n, { status:null, status_started:null, num_marked:false });
-      }
-      const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
-      if(cell){
-        applyStatus(cell, isActive ? 'nieuw' : null);
-        setNumFlag(cell, isActive);
-        if(!isActive) setTimer(cell, '');
-      }
+  // Tafels altijd syncen: bij elke partial/complete opnieuw 'nieuw' + reset van status_started,
+  // zodat de timer in het tafeloverzicht opnieuw begint (personeel ziet dat ze weer langs moeten).
+  const isActive = state !== 'pending';
+  for(const n of (res.table_nums||[])){
+    const z = inferZone(n) || res.zone;
+    if(!z) continue;
+    if(isActive){
+      await upsertTable(z, n, { status:'nieuw', status_started:now, num_marked:true });
+      prevUrgencyLevel.delete(keyOf(z, n));
+    } else {
+      await upsertTable(z, n, { status:null, status_started:null, num_marked:false });
+    }
+    const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
+    if(cell){
+      applyStatus(cell, isActive ? 'nieuw' : null);
+      setNumFlag(cell, isActive);
+      if(!isActive) setTimer(cell, '');
+      cell.classList.remove('urgency-warn','urgency-crit');
     }
   }
 
