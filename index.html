@@ -628,7 +628,176 @@
     min-height:0;
     overflow:hidden;
   }
-  .res-section.res-free{ flex:0 0 auto; }
+  .res-section.res-free{
+    flex:1 1 auto;
+    min-height:0;
+    overflow:hidden;
+  }
+
+  /* Split: 2/3 reserveringen | 1/3 vrije tafels */
+  .res-split{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:10px;
+    flex:1 1 auto;
+    min-height:0;
+    overflow:hidden;
+  }
+  .res-left, .res-right{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    overflow:hidden;
+  }
+  .res-right .free-groups{
+    max-height:none;
+    flex:1 1 auto;
+    min-height:0;
+    align-content:flex-start;
+  }
+
+  /* Edit-mode knop + visuals */
+  .edit-btn{
+    border:1.5px solid var(--rekening);
+    color:#38bdf8;
+    font-weight:800;
+  }
+  .edit-btn[aria-pressed="true"]{
+    background:linear-gradient(180deg, #34d399 0%, var(--run) 100%);
+    border-color:var(--run);
+    color:#fff;
+    box-shadow:0 0 0 2px rgba(52,211,153,.35);
+  }
+
+  .trash-btn{
+    border:1.5px solid rgba(156,163,175,.6);
+    color:#cbd5e1;
+    font-weight:800;
+  }
+
+  .trash-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    background:linear-gradient(180deg, #171717 0%, #0f0f0f 100%);
+    border:1px solid #262626;
+    border-radius:10px;
+  }
+  .trash-row .trash-info{
+    flex:1 1 auto;
+    min-width:0;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    gap:8px;
+  }
+  .trash-row .res-time{ font-weight:900; color:#fff; font-variant-numeric:tabular-nums; }
+  .trash-row .res-name{ font-weight:800; color:#fff; }
+  .trash-row .trash-tables{ color:#9ca3af; font-weight:700; font-size:13px; }
+  .trash-row .trash-restore{
+    appearance:none;
+    padding:8px 14px;
+    border-radius:9px;
+    border:1.5px solid var(--run);
+    background:linear-gradient(180deg, var(--run) 0%, var(--run-2) 100%);
+    color:#fff;
+    font-weight:900;
+    cursor:pointer;
+    font-size:14px;
+  }
+
+  body.edit-mode .res-list{
+    padding:2px;
+  }
+  body.edit-mode .res-row{
+    cursor:copy;
+  }
+  body.edit-mode .res-row.selected{
+    outline:2.5px solid #38bdf8;
+    outline-offset:-2px;
+    box-shadow:0 0 0 4px rgba(56,189,248,.25);
+  }
+  body.edit-mode .res-row.drag-over{
+    outline:2.5px dashed #34d399;
+    outline-offset:-2px;
+    background:linear-gradient(180deg, rgba(16,185,129,.16) 0%, rgba(16,185,129,.04) 100%) !important;
+  }
+
+  body.edit-mode .free-tile{
+    cursor:grab;
+    touch-action:none;
+  }
+  body.edit-mode .free-tile:active{ cursor:grabbing; }
+  body.edit-mode .free-tile.dragging{
+    opacity:.4;
+  }
+
+  /* Drag-ghost (floating clone tijdens slepen) */
+  .drag-ghost{
+    pointer-events:none;
+    box-shadow:0 12px 30px rgba(0,0,0,.55);
+    transform:scale(1.08);
+    opacity:.95;
+    z-index:2147483647;
+  }
+
+  /* Edit-mode hint bar */
+  .edit-hint{
+    display:none;
+    padding:6px 10px;
+    background:linear-gradient(180deg, rgba(56,189,248,.14) 0%, rgba(56,189,248,.04) 100%);
+    border:1px solid rgba(56,189,248,.35);
+    border-radius:8px;
+    font-size:clamp(11px, 1.6vw, 13px);
+    color:#bae6fd;
+    font-weight:700;
+    flex:0 0 auto;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  body.edit-mode .edit-hint{ display:flex; }
+  .edit-hint span{ flex:1 1 auto; min-width:0; }
+
+  .edit-clear-btn{
+    appearance:none;
+    flex:0 0 auto;
+    padding:7px 12px;
+    border-radius:8px;
+    border:1.5px solid rgba(239,68,68,.55);
+    background:linear-gradient(180deg, rgba(239,68,68,.14) 0%, rgba(239,68,68,.04) 100%);
+    color:#f87171;
+    font-weight:900;
+    font-size:clamp(11px, 1.6vw, 13px);
+    cursor:pointer;
+    letter-spacing:.02em;
+    white-space:nowrap;
+  }
+  .edit-clear-btn:active{ transform:scale(.96); }
+
+  /* Chip om een gekoppelde tafel in edit-mode te verwijderen */
+  .res-table-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:4px 8px 4px 10px;
+    border-radius:8px;
+    background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.28);
+    font-weight:900;
+    font-size:clamp(17px, 2.8vw, 21px);
+    color:#fff;
+    font-variant-numeric:tabular-nums;
+  }
+  .res-table-chip .x{
+    display:none;
+    cursor:pointer;
+    color:#f87171;
+    font-weight:900;
+    padding:0 2px;
+  }
+  body.edit-mode .res-table-chip .x{ display:inline; }
 
   .res-section-head{
     display:flex;
@@ -666,12 +835,12 @@
     appearance:none;
     display:inline-flex;
     align-items:baseline;
-    gap:5px;
-    padding:10px 14px;
+    gap:6px;
+    padding:14px 18px;
     border:1.5px solid rgba(16,185,129,.5);
     background:linear-gradient(180deg, rgba(16,185,129,.16) 0%, rgba(16,185,129,.04) 100%);
     color:#fff;
-    border-radius:11px;
+    border-radius:12px;
     cursor:pointer;
     transition:transform .08s;
     line-height:1;
@@ -680,12 +849,12 @@
   .free-tile:active{ transform:scale(.92); }
   .free-tile .tnum{
     font-weight:900;
-    font-size:clamp(17px, 2.4vw, 20px);
+    font-size:clamp(20px, 3vw, 24px);
     letter-spacing:-.02em;
   }
   .free-tile .cap-inline{
     font-weight:700;
-    font-size:clamp(12px, 1.7vw, 14px);
+    font-size:clamp(13px, 1.9vw, 15px);
     color:#34d399;
     opacity:.9;
   }
@@ -776,8 +945,14 @@
   }
 
   .res-tables-text{
-    font-weight:800;
-    font-size:clamp(14px, 2.2vw, 17px);
+    display:inline-flex;
+    align-items:center;
+    padding:3px 10px;
+    border-radius:8px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.22);
+    font-weight:900;
+    font-size:clamp(17px, 2.8vw, 21px);
     color:#fff;
     font-variant-numeric:tabular-nums;
     letter-spacing:-.01em;
@@ -1137,25 +1312,37 @@
       <button class="btn arrived-btn" id="arrivedToggle" type="button" aria-expanded="false">
         Al binnen <span class="arrived-count" id="arrivedToggleLbl">0</span>
       </button>
+      <button class="btn edit-btn" id="resEdit" type="button" aria-pressed="false">Bewerken</button>
+      <button class="btn trash-btn" id="resTrash" type="button">Prullenbak</button>
       <button class="btn gold" id="resRefresh">Vernieuwen</button>
     </div>
 
     <div class="arrived-panel" id="arrivedPanel" hidden></div>
 
-    <div class="res-section res-main">
-      <div class="res-section-head">
-        <span class="res-section-title">Nog niet binnen</span>
-        <span class="res-section-sub" id="resListSub"></span>
-      </div>
-      <div class="res-list" id="resList"></div>
+    <div class="edit-hint" id="editHint">
+      <span>Bewerkmodus — kies een reservering en klik of sleep een vrije tafel om te koppelen. Druk op Opslaan als je klaar bent.</span>
+      <button class="edit-clear-btn" id="editClearAll" type="button">Alles leegmaken</button>
     </div>
 
-    <div class="res-section res-free">
-      <div class="res-section-head">
-        <span class="res-section-title">Vrije tafels</span>
-        <span class="res-section-sub" id="freeSub">—</span>
+    <div class="res-split">
+      <div class="res-left">
+        <div class="res-section res-main">
+          <div class="res-section-head">
+            <span class="res-section-title">Nog niet binnen</span>
+            <span class="res-section-sub" id="resListSub"></span>
+          </div>
+          <div class="res-list" id="resList"></div>
+        </div>
       </div>
-      <div class="free-groups" id="freeGroups"></div>
+      <div class="res-right">
+        <div class="res-section res-free">
+          <div class="res-section-head">
+            <span class="res-section-title">Vrije tafels</span>
+            <span class="res-section-sub" id="freeSub">—</span>
+          </div>
+          <div class="free-groups" id="freeGroups"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1244,6 +1431,34 @@
       <div class="modal-footer">
         <button class="link" id="newResCancel">Annuleren</button>
         <button class="link primary" id="newResSave">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prullenbak: vrijgegeven reserveringen terughalen -->
+  <div id="trashOverlay" class="overlay" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="arrive-title">Prullenbak</div>
+        <div class="arrive-sub" id="trashSub">Vrijgegeven reserveringen van deze dag. Tik op "Terughalen" om ze terug in de lijst te zetten.</div>
+      </div>
+      <div class="arrive-actions" id="trashList"></div>
+      <div class="modal-footer">
+        <button class="link" id="trashClose">Sluiten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bewerk-mode: alle tafelkoppelingen wissen -->
+  <div id="clearAllOverlay" class="overlay" aria-modal="true" role="dialog">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="arrive-title">Alle tafelkoppelingen wissen?</div>
+        <div class="arrive-sub">Van alle reserveringen die nog niet (deels) binnen zijn wordt het tafelnummer losgekoppeld. Je kunt dit nog annuleren door niet op Opslaan te drukken.</div>
+      </div>
+      <div class="arrive-actions">
+        <button class="choice arrive-release-confirm arrive-size-lg" id="clearAllConfirm">Ja, alles leegmaken</button>
+        <button class="choice reset arrive-size-sm" id="clearAllCancel">Annuleren</button>
       </div>
     </div>
   </div>
@@ -1498,6 +1713,12 @@ const newResSaveEl = document.getElementById('newResSave');
 const newResCancelEl = document.getElementById('newResCancel');
 let pendingFreeTable = null;
 let selectedTimeSlot = null;
+
+const resEditBtnEl = document.getElementById('resEdit');
+let editMode = false;
+let selectedResId = null;
+const dirtyIds = new Set();
+const editSnapshot = new Map();
 
 const changeTableOverlayEl = document.getElementById('changeTableOverlay');
 const changeTableSubEl = document.getElementById('changeTableSub');
@@ -1903,10 +2124,20 @@ async function fetchReservations(dateStr){
   reservations = [];
   if(!sb) return;
   try{
-    const { data, error } = await sb.from('reservations')
+    let { data, error } = await sb.from('reservations')
       .select('*')
       .eq('res_date', dateStr)
+      .is('deleted_at', null)
       .order('res_time', { ascending:true, nullsFirst:false });
+    if(error){
+      // Kolom deleted_at bestaat mogelijk nog niet → fallback zonder filter
+      console.warn('fetchReservations: fallback zonder deleted_at filter', error);
+      const retry = await sb.from('reservations')
+        .select('*')
+        .eq('res_date', dateStr)
+        .order('res_time', { ascending:true, nullsFirst:false });
+      data = retry.data; error = retry.error;
+    }
     if(error){ console.error('fetchReservations', error); return; }
     reservations = data || [];
   }catch(e){ console.error('fetchReservations ex', e); }
@@ -1998,11 +2229,12 @@ function makeResRow(r){
   if(state === 'complete') cls += ' arrived';
   else if(state === 'partial') cls += ' partial';
   if(late) cls += ' late';
+  if(editMode && selectedResId === r.id) cls += ' selected';
   row.className = cls;
   row.dataset.id = r.id;
 
   const timeTxt  = r.res_time ? r.res_time.slice(0,5) : '—';
-  const tablesTxt = (r.table_nums||[]).join(' · ') || '—';
+  const nums     = r.table_nums || [];
   const partyHtml = r.party_size ? `<span class="res-party">${r.party_size}p</span>` : '';
   const stateChip = state === 'partial'  ? `<span class="res-state-chip partial">Deels</span>`
                  : state === 'complete' ? `<span class="res-state-chip complete">Binnen</span>`
@@ -2012,23 +2244,46 @@ function makeResRow(r){
     ? `<a class="res-phone-link" href="${telHref(r.phone)}" data-phone="1">${escapeHtml(r.phone)}</a>`
     : '';
 
+  let tablesHtml;
+  if(editMode){
+    tablesHtml = nums.length
+      ? nums.map(n => `<span class="res-table-chip" data-tnum="${n}">${n}<span class="x" data-del="${n}">×</span></span>`).join(' ')
+      : `<span class="res-tables-text" style="opacity:.5">T —</span>`;
+  } else {
+    const tablesTxt = nums.join(' · ') || '—';
+    tablesHtml = `<span class="res-tables-text">T ${escapeHtml(tablesTxt)}</span>`;
+  }
+
   row.innerHTML = `
     <span class="res-time">${timeTxt}</span>
     <span class="res-name">${escapeHtml(r.name || '(onbekend)')}${stateChip}</span>
     ${lateChip}
     ${phoneHtml}
-    <span class="res-tables-text">T ${escapeHtml(tablesTxt)}</span>
+    ${tablesHtml}
     ${partyHtml}
     ${r.notes ? `<span class="res-note-inline">${escapeHtml(r.notes)}</span>` : ''}
   `;
 
-  // Klik op telefoonlink mag niet de arrive-modal openen
   const phoneEl = row.querySelector('[data-phone="1"]');
-  if(phoneEl){
-    phoneEl.addEventListener('click', (e)=> e.stopPropagation());
+  if(phoneEl){ phoneEl.addEventListener('click', (e)=> e.stopPropagation()); }
+
+  if(editMode){
+    row.querySelectorAll('[data-del]').forEach(x => {
+      x.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        removeTableFromRes(r.id, Number(x.dataset.del));
+      });
+    });
+
   }
 
   row.addEventListener('click', ()=>{
+    if(editMode){
+      selectedResId = r.id;
+      haptic(8);
+      renderResList();
+      return;
+    }
     haptic(10);
     openArriveModal(r);
   });
@@ -2165,17 +2420,107 @@ async function releaseReservation(res){
     const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
     if(cell){ applyStatus(cell, null); setNumFlag(cell, false); setTimer(cell, ''); }
   }
-  // 2) Reservering verwijderen
+  // 2) Reservering soft-deleten (terughaalbaar via Prullenbak)
+  const now = new Date().toISOString();
   if(sb){
     try{
-      const { error } = await sb.from('reservations').delete().eq('id', res.id);
-      if(error) console.error('release delete', error);
+      const { error } = await sb.from('reservations').update({ deleted_at: now, updated_at: now }).eq('id', res.id);
+      if(error) console.error('release soft-delete', error);
     }catch(e){ console.error('release ex', e); }
   }
   reservations = reservations.filter(r => r.id !== res.id);
   refreshDerived();
   renderReservationsView();
 }
+
+/* ===== Prullenbak: vrijgegeven reserveringen terughalen ===== */
+const resTrashBtnEl = document.getElementById('resTrash');
+const trashOverlayEl = document.getElementById('trashOverlay');
+const trashListEl = document.getElementById('trashList');
+const trashCloseEl = document.getElementById('trashClose');
+
+async function fetchDeletedReservations(dateStr){
+  if(!sb) return [];
+  try{
+    const { data, error } = await sb.from('reservations')
+      .select('*')
+      .eq('res_date', dateStr)
+      .not('deleted_at','is', null)
+      .order('deleted_at', { ascending:false });
+    if(error){ console.error('fetchDeleted', error); return []; }
+    return data || [];
+  }catch(e){ console.error('fetchDeleted ex', e); return []; }
+}
+
+async function openTrashModal(){
+  trashListEl.innerHTML = '<div class="res-empty">Laden...</div>';
+  trashOverlayEl.classList.add('open');
+  const list = await fetchDeletedReservations(currentResDate);
+  renderTrashList(list);
+}
+function closeTrashModal(){ trashOverlayEl.classList.remove('open'); }
+
+function renderTrashList(list){
+  trashListEl.innerHTML = '';
+  if(!list.length){
+    const e = document.createElement('div');
+    e.className = 'res-empty';
+    e.textContent = 'Geen vrijgegeven reserveringen voor deze dag.';
+    trashListEl.appendChild(e);
+    return;
+  }
+  for(const r of list){
+    const row = document.createElement('div');
+    row.className = 'trash-row';
+    const timeTxt = r.res_time ? r.res_time.slice(0,5) : '—';
+    const partyTxt = r.party_size ? `${r.party_size}p` : '';
+    const tablesTxt = (r.table_nums||[]).join(' · ');
+    row.innerHTML = `
+      <div class="trash-info">
+        <span class="res-time">${timeTxt}</span>
+        <span class="res-name">${escapeHtml(r.name || '(onbekend)')}</span>
+        ${partyTxt ? `<span class="trash-tables">${partyTxt}</span>` : ''}
+        ${tablesTxt ? `<span class="trash-tables">T ${escapeHtml(tablesTxt)}</span>` : ''}
+      </div>
+      <button class="trash-restore" type="button">Terughalen</button>
+    `;
+    row.querySelector('.trash-restore').addEventListener('click', async ()=>{
+      haptic(15);
+      await restoreReservation(r);
+      // Lokaal uit lijst halen
+      const idx = list.indexOf(r);
+      if(idx >= 0) list.splice(idx,1);
+      renderTrashList(list);
+    });
+    trashListEl.appendChild(row);
+  }
+}
+
+async function restoreReservation(res){
+  const now = new Date().toISOString();
+  if(sb){
+    try{
+      const { data, error } = await sb.from('reservations')
+        .update({ deleted_at: null, updated_at: now })
+        .eq('id', res.id)
+        .select()
+        .single();
+      if(error){ console.error('restore', error); return; }
+      if(data){ reservations.push(data); }
+    }catch(e){ console.error('restore ex', e); return; }
+  } else {
+    reservations.push({ ...res, deleted_at: null });
+  }
+  refreshDerived();
+  renderReservationsView();
+}
+
+resTrashBtnEl.addEventListener('click', ()=>{
+  haptic(10);
+  openTrashModal();
+});
+trashCloseEl.addEventListener('click', closeTrashModal);
+trashOverlayEl.addEventListener('click', (e)=>{ if(e.target===trashOverlayEl) closeTrashModal(); });
 
 function openChangeTableModal(res){
   changingRes = res;
@@ -2415,13 +2760,228 @@ function renderFreeTables(){
       <span class="tnum">${t.num}</span>
       <span class="cap-inline">${t.cap ? `(${t.cap})` : ''}</span>
     `;
-    el.addEventListener('click', ()=>{
+    if(editMode){
+      initTouchDrag(el, t.num);
+    }
+    el.addEventListener('click', (e)=>{
+      if(el._suppressClick){
+        e.preventDefault(); e.stopPropagation();
+        return;
+      }
       haptic(10);
+      if(editMode){
+        if(selectedResId) assignTableToSelected(t.num);
+        return;
+      }
       openFreeActionModal(t);
     });
     freeGroupsEl.appendChild(el);
   }
 }
+
+/* ===== Edit-mode: touch-vriendelijke drag-and-drop ===== */
+function initTouchDrag(tile, tableNum){
+  let ghost = null;
+  let hoveredRow = null;
+  let startX = 0, startY = 0;
+  let dragging = false;
+  const THRESHOLD = 8;
+
+  function cleanup(){
+    if(hoveredRow){ hoveredRow.classList.remove('drag-over'); hoveredRow = null; }
+    if(ghost){ ghost.remove(); ghost = null; }
+    tile.classList.remove('dragging');
+    dragging = false;
+  }
+
+  tile.addEventListener('pointerdown', (e)=>{
+    if(!editMode) return;
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    startX = e.clientX; startY = e.clientY;
+    dragging = false;
+    try{ tile.setPointerCapture(e.pointerId); }catch(_){}
+  });
+
+  tile.addEventListener('pointermove', (e)=>{
+    if(!editMode) return;
+    if(!tile.hasPointerCapture || !tile.hasPointerCapture(e.pointerId)) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if(!dragging){
+      if(Math.hypot(dx, dy) < THRESHOLD) return;
+      dragging = true;
+      tile.classList.add('dragging');
+      const rect = tile.getBoundingClientRect();
+      ghost = tile.cloneNode(true);
+      ghost.classList.add('drag-ghost');
+      ghost.style.position = 'fixed';
+      ghost.style.left = rect.left + 'px';
+      ghost.style.top  = rect.top + 'px';
+      ghost.style.width = rect.width + 'px';
+      ghost.style.margin = '0';
+      document.body.appendChild(ghost);
+      haptic(10);
+    }
+    if(dragging){
+      e.preventDefault();
+      const gr = ghost.getBoundingClientRect();
+      ghost.style.left = (e.clientX - gr.width/2) + 'px';
+      ghost.style.top  = (e.clientY - gr.height/2) + 'px';
+      ghost.style.display = 'none';
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      ghost.style.display = '';
+      const row = under ? under.closest('.res-row') : null;
+      if(row !== hoveredRow){
+        if(hoveredRow) hoveredRow.classList.remove('drag-over');
+        hoveredRow = row;
+        if(hoveredRow) hoveredRow.classList.add('drag-over');
+      }
+    }
+  });
+
+  function finish(e){
+    if(!editMode){ cleanup(); return; }
+    if(dragging){
+      if(hoveredRow){
+        const resId = hoveredRow.dataset.id;
+        selectedResId = resId;
+        assignTableToSelected(tableNum);
+      }
+      // voorkom dat pointerup een click triggert op de tile
+      tile._suppressClick = true;
+      setTimeout(()=>{ tile._suppressClick = false; }, 350);
+    }
+    try{ tile.releasePointerCapture(e.pointerId); }catch(_){}
+    cleanup();
+  }
+  tile.addEventListener('pointerup', finish);
+  tile.addEventListener('pointercancel', finish);
+}
+
+/* ===== Edit-mode: koppelen, loskoppelen, opslaan ===== */
+function assignTableToSelected(num){
+  if(!selectedResId) return;
+  const r = reservations.find(x => x.id === selectedResId);
+  if(!r) return;
+  const nums = [...(r.table_nums||[])];
+  if(nums.includes(num)) return;
+  nums.push(num);
+  r.table_nums = nums;
+  r.zone = inferZone(nums[0]) || r.zone;
+  dirtyIds.add(r.id);
+  haptic(15);
+  renderReservationsView();
+}
+
+function removeTableFromRes(id, num){
+  const r = reservations.find(x => x.id === id);
+  if(!r) return;
+  r.table_nums = (r.table_nums||[]).filter(n => n !== num);
+  dirtyIds.add(r.id);
+  haptic(10);
+  renderReservationsView();
+}
+
+function enterEditMode(){
+  editMode = true;
+  selectedResId = null;
+  dirtyIds.clear();
+  editSnapshot.clear();
+  for(const r of reservations){ editSnapshot.set(r.id, [...(r.table_nums||[])]); }
+  resEditBtnEl.textContent = 'Opslaan';
+  resEditBtnEl.setAttribute('aria-pressed', 'true');
+  document.body.classList.add('edit-mode');
+  renderReservationsView();
+}
+
+async function exitEditModeAndSave(){
+  if(dirtyIds.size){
+    for(const id of [...dirtyIds]){
+      const r = reservations.find(x => x.id === id);
+      if(!r) continue;
+      const oldNums = editSnapshot.get(id) || [];
+      const newNums = r.table_nums || [];
+      const state = getArrivalState(r);
+      const now = new Date().toISOString();
+
+      // Update reservering-rij
+      if(sb){
+        try{
+          const { error } = await sb.from('reservations').update({
+            table_nums: newNums,
+            zone: inferZone(newNums[0]) || r.zone,
+            updated_at: now
+          }).eq('id', id);
+          if(error) console.error('edit save', error);
+        }catch(e){ console.error('edit save ex', e); }
+      }
+
+      // Bij actieve reservering: tables_status bijwerken
+      if(state !== 'pending'){
+        for(const n of oldNums){
+          if(newNums.includes(n)) continue;
+          const z = inferZone(n);
+          if(!z) continue;
+          await upsertTable(z, n, { status:null, status_started:null, num_marked:false });
+          const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
+          if(cell){ applyStatus(cell, null); setNumFlag(cell, false); setTimer(cell, ''); }
+        }
+        for(const n of newNums){
+          if(oldNums.includes(n)) continue;
+          const z = inferZone(n);
+          if(!z) continue;
+          await upsertTable(z, n, { status:'nieuw', status_started:now, num_marked:true });
+          const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
+          if(cell){ applyStatus(cell, 'nieuw'); setNumFlag(cell, true); }
+        }
+      }
+    }
+  }
+  editMode = false;
+  selectedResId = null;
+  dirtyIds.clear();
+  editSnapshot.clear();
+  resEditBtnEl.textContent = 'Bewerken';
+  resEditBtnEl.setAttribute('aria-pressed', 'false');
+  document.body.classList.remove('edit-mode');
+  refreshDerived();
+  renderReservationsView();
+}
+
+resEditBtnEl.addEventListener('click', async ()=>{
+  haptic(12);
+  if(editMode){ await exitEditModeAndSave(); }
+  else { enterEditMode(); }
+});
+
+/* Alles leegmaken (in edit-mode) */
+const editClearAllEl = document.getElementById('editClearAll');
+const clearAllOverlayEl = document.getElementById('clearAllOverlay');
+const clearAllConfirmEl = document.getElementById('clearAllConfirm');
+const clearAllCancelEl = document.getElementById('clearAllCancel');
+
+editClearAllEl.addEventListener('click', ()=>{
+  if(!editMode) return;
+  haptic(10);
+  clearAllOverlayEl.classList.add('open');
+});
+clearAllCancelEl.addEventListener('click', ()=> clearAllOverlayEl.classList.remove('open'));
+clearAllOverlayEl.addEventListener('click', (e)=>{
+  if(e.target===clearAllOverlayEl) clearAllOverlayEl.classList.remove('open');
+});
+clearAllConfirmEl.addEventListener('click', ()=>{
+  haptic(22);
+  clearAllOverlayEl.classList.remove('open');
+  for(const r of reservations){
+    if(getArrivalState(r) !== 'pending') continue;
+    if((r.table_nums||[]).length){
+      r.table_nums = [];
+      dirtyIds.add(r.id);
+    }
+  }
+  selectedResId = null;
+  renderReservationsView();
+});
 
 /* ===== Vrije tafel → Passant of Nieuwe reservering ===== */
 function openFreeActionModal(t){
