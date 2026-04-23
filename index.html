@@ -2894,49 +2894,61 @@ function enterEditMode(){
   renderReservationsView();
 }
 
-async function exitEditModeAndSave(){
-  if(dirtyIds.size){
-    for(const id of [...dirtyIds]){
-      const r = reservations.find(x => x.id === id);
-      if(!r) continue;
-      const oldNums = editSnapshot.get(id) || [];
-      const newNums = r.table_nums || [];
-      const state = getArrivalState(r);
-      const now = new Date().toISOString();
+async function saveOneEditedReservation(id){
+  const r = reservations.find(x => x.id === id);
+  if(!r) return;
+  const oldNums = editSnapshot.get(id) || [];
+  const newNums = r.table_nums || [];
+  const state   = getArrivalState(r);
+  const now     = new Date().toISOString();
 
-      // Update reservering-rij
-      if(sb){
-        try{
-          const { error } = await sb.from('reservations').update({
-            table_nums: newNums,
-            zone: inferZone(newNums[0]) || r.zone,
-            updated_at: now
-          }).eq('id', id);
-          if(error) console.error('edit save', error);
-        }catch(e){ console.error('edit save ex', e); }
-      }
+  if(sb){
+    const { error } = await sb.from('reservations').update({
+      table_nums: newNums,
+      zone: inferZone(newNums[0]) || r.zone,
+      updated_at: now
+    }).eq('id', id);
+    if(error) throw error;
+  }
 
-      // Bij actieve reservering: tables_status bijwerken
-      if(state !== 'pending'){
-        for(const n of oldNums){
-          if(newNums.includes(n)) continue;
-          const z = inferZone(n);
-          if(!z) continue;
-          await upsertTable(z, n, { status:null, status_started:null, num_marked:false });
-          const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
-          if(cell){ applyStatus(cell, null); setNumFlag(cell, false); setTimer(cell, ''); }
-        }
-        for(const n of newNums){
-          if(oldNums.includes(n)) continue;
-          const z = inferZone(n);
-          if(!z) continue;
-          await upsertTable(z, n, { status:'nieuw', status_started:now, num_marked:true });
-          const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
-          if(cell){ applyStatus(cell, 'nieuw'); setNumFlag(cell, true); }
-        }
-      }
+  if(state !== 'pending'){
+    for(const n of oldNums){
+      if(newNums.includes(n)) continue;
+      const z = inferZone(n) || r.zone;
+      if(!z) continue;
+      await upsertTable(z, n, { status:null, status_started:null, num_marked:false });
+      const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
+      if(cell){ applyStatus(cell, null); setNumFlag(cell, false); setTimer(cell, ''); }
+    }
+    for(const n of newNums){
+      if(oldNums.includes(n)) continue;
+      const z = inferZone(n) || r.zone;
+      if(!z) continue;
+      await upsertTable(z, n, { status:'nieuw', status_started:now, num_marked:true });
+      const cell = document.querySelector(`.table[data-zone="${z}"][data-num="${n}"]`);
+      if(cell){ applyStatus(cell, 'nieuw'); setNumFlag(cell, true); }
     }
   }
+}
+
+async function exitEditModeAndSave(){
+  if(dirtyIds.size){
+    const toSave = [...dirtyIds];
+    const results = await Promise.allSettled(toSave.map(saveOneEditedReservation));
+    const failed = results
+      .map((res, idx) => res.status === 'rejected' ? toSave[idx] : null)
+      .filter(Boolean);
+
+    if(failed.length){
+      console.error('Edit save failures:', results.filter(r => r.status === 'rejected').map(r => r.reason));
+      alert(`${failed.length} reservering${failed.length > 1 ? 'en konden' : ' kon'} niet opgeslagen worden. Blijf in bewerkmodus en druk nogmaals op Opslaan om opnieuw te proberen.`);
+      // Houd alleen de mislukte ids in dirty zodat een tweede klik alleen die opnieuw probeert
+      dirtyIds.clear();
+      for(const id of failed) dirtyIds.add(id);
+      return; // blijf in bewerkmodus
+    }
+  }
+
   editMode = false;
   selectedResId = null;
   dirtyIds.clear();
@@ -2944,6 +2956,9 @@ async function exitEditModeAndSave(){
   resEditBtnEl.textContent = 'Bewerken';
   resEditBtnEl.setAttribute('aria-pressed', 'false');
   document.body.classList.remove('edit-mode');
+
+  // Her-synchroniseer met server (voor updates die tijdens bewerken gepauzeerd waren)
+  try { await fetchReservations(currentResDate); } catch(_){}
   refreshDerived();
   renderReservationsView();
 }
@@ -3203,7 +3218,9 @@ function subscribeRealtimeReservations(){
       const row = payload.new || payload.old;
       if(!row) return;
       if(row.res_date !== currentResDate) return;
-      // Simpelste: volledig herladen voor de huidige datum
+      // Tijdens bewerkmodus NIET verversen — anders overschrijft realtime
+      // de nog-niet-opgeslagen tafelkoppelingen in je lokale lijst.
+      if(editMode) return;
       await fetchReservations(currentResDate);
       if(currentView === 'reservations') renderReservationsView();
     })
