@@ -741,7 +741,7 @@
   .bouwlijst-list{
     columns:2;
     column-gap:10mm;
-    column-fill:auto;
+    column-fill:balance;
   }
   .bouwlijst-row{
     display:flex;
@@ -803,6 +803,9 @@
     }
     .bouwlijst-actions{ display:none !important; }
     .bouwlijst-row{ break-inside:avoid; }
+    .bouwlijst-list{
+      column-fill:balance !important;
+    }
     @page{ size:A4 portrait; margin:10mm; }
   }
 
