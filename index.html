@@ -739,9 +739,10 @@
     border-color:#111;
   }
   .bouwlijst-list{
-    columns:2;
-    column-gap:10mm;
-    column-fill:balance;
+    display:grid;
+    grid-auto-flow:column;
+    gap:0 10mm;
+    /* grid-template-columns en -rows worden via JS ingesteld op basis van aantal regels */
   }
   .bouwlijst-row{
     display:flex;
@@ -751,7 +752,6 @@
     border-bottom:1px dotted #bbb;
     font-variant-numeric:tabular-nums;
     break-inside:avoid;
-    -webkit-column-break-inside:avoid;
     page-break-inside:avoid;
   }
   .bouwlijst-row .tnum{
@@ -769,7 +769,7 @@
     color:#666;
     font-style:italic;
     text-align:center;
-    column-span:all;
+    grid-column:1 / -1;
   }
   .bouwlijst-footer{
     margin-top:10pt;
@@ -803,9 +803,6 @@
     }
     .bouwlijst-actions{ display:none !important; }
     .bouwlijst-row{ break-inside:avoid; }
-    .bouwlijst-list{
-      column-fill:balance !important;
-    }
     @page{ size:A4 portrait; margin:10mm; }
   }
 
@@ -2728,10 +2725,14 @@ function renderBouwlijst(){
   }
 
   // Aantal kolommen adaptief bepalen zodat alles op 1 A4 past.
-  // Ruwe vuistregel: ~32 regels per kolom op A4 bij standaard font.
-  const rowsPerCol = 32;
-  const cols = Math.min(5, Math.max(1, Math.ceil(entries.length / rowsPerCol)));
-  bouwlijstListEl.style.columnCount = cols;
+  // Ruwe vuistregel: ~30 regels per kolom bij standaard font; grid-auto-flow:column
+  // vult eerst de eerste kolom van boven naar onder, dan de volgende.
+  const maxRowsPerCol = 30;
+  const cols = Math.min(5, Math.max(1, Math.ceil(entries.length / maxRowsPerCol)));
+  const rowsNeeded = Math.max(1, Math.ceil(entries.length / cols));
+  bouwlijstListEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  bouwlijstListEl.style.gridTemplateRows = `repeat(${rowsNeeded}, auto)`;
+  bouwlijstListEl.style.columnCount = '';  // verwijder oude multi-column instelling
 
   for(const e of entries){
     const row = document.createElement('div');
