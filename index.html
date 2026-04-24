@@ -675,6 +675,135 @@
     font-weight:800;
   }
 
+  .bouwlijst-btn{
+    border:1.5px solid rgba(200,164,91,.6);
+    background:linear-gradient(180deg, rgba(200,164,91,.18) 0%, rgba(200,164,91,.04) 100%);
+    color:#f3e4bc;
+    font-weight:900;
+    letter-spacing:.02em;
+  }
+
+  /* ===== Bouwlijst overlay (zwart op wit, printbaar) ===== */
+  .bouwlijst-overlay{ background:rgba(0,0,0,.85); }
+  .bouwlijst-sheet{
+    width:100%;
+    max-width:210mm;
+    background:#fff;
+    color:#000;
+    padding:14mm 14mm;
+    border-radius:6px;
+    max-height:95vh;
+    overflow-y:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,.55);
+    font:14pt/1.3 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  .bouwlijst-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:20px;
+    border-bottom:2px solid #000;
+    padding-bottom:6pt;
+    margin-bottom:10pt;
+  }
+  .bouwlijst-title{
+    margin:0;
+    font-size:20pt;
+    font-weight:900;
+    letter-spacing:-.01em;
+    color:#000;
+  }
+  .bouwlijst-date{
+    font-size:12pt;
+    font-weight:700;
+    color:#333;
+    margin-top:2pt;
+    text-transform:capitalize;
+  }
+  .bouwlijst-actions{
+    display:flex;
+    gap:8px;
+    flex:0 0 auto;
+  }
+  .bouwlijst-actions .link{
+    background:#f3f3f3;
+    color:#111;
+    border:1px solid #aaa;
+    font-weight:800;
+    padding:8px 14px;
+    border-radius:6px;
+  }
+  .bouwlijst-actions .link.primary{
+    background:#111;
+    color:#fff;
+    border-color:#111;
+  }
+  .bouwlijst-list{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    column-gap:18mm;
+    row-gap:2pt;
+  }
+  .bouwlijst-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:5pt 2pt;
+    border-bottom:1px dotted #bbb;
+    font-variant-numeric:tabular-nums;
+  }
+  .bouwlijst-row .tnum{
+    font-weight:900;
+    font-size:15pt;
+    color:#000;
+  }
+  .bouwlijst-row .pax{
+    font-weight:800;
+    font-size:15pt;
+    color:#000;
+  }
+  .bouwlijst-empty{
+    padding:20pt 0;
+    color:#666;
+    font-style:italic;
+    text-align:center;
+    grid-column:1 / -1;
+  }
+  .bouwlijst-footer{
+    margin-top:10pt;
+    padding-top:6pt;
+    border-top:1px solid #888;
+    font-size:11pt;
+    font-weight:700;
+    color:#333;
+  }
+
+  @media print{
+    body{ background:#fff !important; }
+    body > *{ visibility:hidden !important; }
+    #bouwlijstOverlay, #bouwlijstOverlay *{ visibility:visible !important; }
+    #bouwlijstOverlay{
+      position:absolute !important;
+      inset:0 !important;
+      background:#fff !important;
+      padding:0 !important;
+      display:block !important;
+      backdrop-filter:none !important;
+      -webkit-backdrop-filter:none !important;
+    }
+    .bouwlijst-sheet{
+      max-width:none !important;
+      max-height:none !important;
+      padding:12mm 14mm !important;
+      border-radius:0 !important;
+      box-shadow:none !important;
+      overflow:visible !important;
+    }
+    .bouwlijst-actions{ display:none !important; }
+    .bouwlijst-row{ break-inside:avoid; }
+    @page{ size:A4 portrait; margin:10mm; }
+  }
+
   .trash-row{
     display:flex;
     align-items:center;
@@ -821,7 +950,7 @@
     font-weight:700;
   }
 
-  /* Vrije tafels — compact: alle nummers met capaciteit erachter */
+  /* Vrije tafels — compact: alleen tafelnummers */
   .free-groups{
     display:flex;
     flex-wrap:wrap;
@@ -1313,6 +1442,7 @@
         Al binnen <span class="arrived-count" id="arrivedToggleLbl">0</span>
       </button>
       <button class="btn edit-btn" id="resEdit" type="button" aria-pressed="false">Bewerken</button>
+      <button class="btn bouwlijst-btn" id="resBouwlijst" type="button">Bouwlijst</button>
       <button class="btn trash-btn" id="resTrash" type="button">Prullenbak</button>
       <button class="btn gold" id="resRefresh">Vernieuwen</button>
     </div>
@@ -1463,6 +1593,26 @@
     </div>
   </div>
 
+  <!-- Bouwlijst overlay (print-vriendelijk) -->
+  <div id="bouwlijstOverlay" class="overlay bouwlijst-overlay" aria-modal="true" role="dialog">
+    <div class="bouwlijst-sheet">
+      <div class="bouwlijst-header">
+        <div>
+          <h1 class="bouwlijst-title">Bouwlijst</h1>
+          <div class="bouwlijst-date" id="bouwlijstDate"></div>
+        </div>
+        <div class="bouwlijst-actions">
+          <button class="link primary" id="bouwlijstPrint" type="button">Printen</button>
+          <button class="link" id="bouwlijstClose" type="button">Sluiten</button>
+        </div>
+      </div>
+      <div class="bouwlijst-list" id="bouwlijstList"></div>
+      <div class="bouwlijst-footer">
+        <span id="bouwlijstTotals"></span>
+      </div>
+    </div>
+  </div>
+
   <!-- Reset alles bevestiging -->
   <div id="resetOverlay" class="overlay" aria-modal="true" role="dialog">
     <div class="modal">
@@ -1603,6 +1753,14 @@ const RANGES_BOVEN   = [[20,54],[57,58]];
 const GROUPS = [
   { label:'Beneden', zone:'bt', ranges:RANGES_BENEDEN },
   { label:'Boven',   zone:'boven', ranges:RANGES_BOVEN }
+];
+
+/* Tafels die standaard NIET in de "vrije tafels"-lijst en hoofdgrid staan.
+   Alleen zichtbaar in bewerkmodus, zodat ze wel kunnen worden toegewezen. */
+const HIDDEN_GROUPS = [
+  { label:'Extra beneden', zone:'bt',     ranges:[[13,15]] },
+  { label:'Extra boven',   zone:'boven',  ranges:[[55,56]] },
+  { label:'Terras',        zone:'terras', ranges:[[70,86]] }
 ];
 
 const STATUS_CLASSES = {
@@ -2204,8 +2362,9 @@ async function setArrivalState(res, state){
 
 function inferZone(num){
   if(num == null) return null;
-  if(num >= 1 && num <= 13) return 'bt';
+  if(num >= 1 && num <= 15) return 'bt';
   if(num >= 20 && num <= 58) return 'boven';
+  if(num >= 70 && num <= 86) return 'terras';
   return null;
 }
 
@@ -2522,6 +2681,69 @@ resTrashBtnEl.addEventListener('click', ()=>{
 trashCloseEl.addEventListener('click', closeTrashModal);
 trashOverlayEl.addEventListener('click', (e)=>{ if(e.target===trashOverlayEl) closeTrashModal(); });
 
+/* ===== Bouwlijst: printvriendelijk overzicht van tafels + pax ===== */
+const resBouwlijstBtnEl = document.getElementById('resBouwlijst');
+const bouwlijstOverlayEl = document.getElementById('bouwlijstOverlay');
+const bouwlijstListEl = document.getElementById('bouwlijstList');
+const bouwlijstDateEl = document.getElementById('bouwlijstDate');
+const bouwlijstTotalsEl = document.getElementById('bouwlijstTotals');
+const bouwlijstCloseEl = document.getElementById('bouwlijstClose');
+const bouwlijstPrintEl = document.getElementById('bouwlijstPrint');
+
+function openBouwlijst(){
+  renderBouwlijst();
+  bouwlijstOverlayEl.classList.add('open');
+}
+function closeBouwlijst(){ bouwlijstOverlayEl.classList.remove('open'); }
+
+function renderBouwlijst(){
+  bouwlijstDateEl.textContent = formatDateNL(currentResDate);
+  bouwlijstListEl.innerHTML = '';
+
+  // Één rij per reservering die tafels heeft, gesorteerd op kleinste tafelnummer
+  const entries = [];
+  let totalPax = 0;
+  let totalTables = 0;
+  for(const r of reservations){
+    const nums = (r.table_nums||[]).slice().sort((a,b)=> a-b);
+    if(!nums.length) continue;
+    entries.push({ tables: nums, pax: r.party_size || 0, sortKey: nums[0] });
+    totalPax += (r.party_size || 0);
+    totalTables += nums.length;
+  }
+  entries.sort((a,b)=> a.sortKey - b.sortKey);
+
+  if(!entries.length){
+    const empty = document.createElement('div');
+    empty.className = 'bouwlijst-empty';
+    empty.textContent = 'Nog geen tafels toegewezen voor deze dag.';
+    bouwlijstListEl.appendChild(empty);
+    bouwlijstTotalsEl.textContent = '';
+    return;
+  }
+
+  for(const e of entries){
+    const row = document.createElement('div');
+    row.className = 'bouwlijst-row';
+    const tableLabel = 'T ' + e.tables.join(' + ');
+    const paxLabel = e.pax ? `${e.pax}p` : '?';
+    row.innerHTML = `<span class="tnum">${tableLabel}</span><span class="pax">${paxLabel}</span>`;
+    bouwlijstListEl.appendChild(row);
+  }
+
+  bouwlijstTotalsEl.textContent = `Totaal: ${entries.length} reservering${entries.length === 1 ? '' : 'en'} · ${totalTables} tafel${totalTables === 1 ? '' : 's'} · ${totalPax} couvert${totalPax === 1 ? '' : 's'}`;
+}
+
+resBouwlijstBtnEl.addEventListener('click', ()=>{
+  haptic(10);
+  openBouwlijst();
+});
+bouwlijstCloseEl.addEventListener('click', closeBouwlijst);
+bouwlijstOverlayEl.addEventListener('click', (e)=>{
+  if(e.target === bouwlijstOverlayEl) closeBouwlijst();
+});
+bouwlijstPrintEl.addEventListener('click', ()=> window.print());
+
 function openChangeTableModal(res){
   changingRes = res;
   const tablesTxt = (res.table_nums||[]).join(', ');
@@ -2545,6 +2767,7 @@ function parseTableInput(str){
 function allValidTableNums(){
   const set = new Set();
   for(const g of GROUPS) for(const n of expandRanges(g.ranges)) set.add(n);
+  for(const g of HIDDEN_GROUPS) for(const n of expandRanges(g.ranges)) set.add(n);
   return set;
 }
 
@@ -2736,8 +2959,11 @@ function renderFreeTables(){
     for(const n of (r.table_nums||[])) reservedNums.add(n);
   }
 
+  // Normale groepen altijd tonen; verborgen groepen (extra/terras) alleen in bewerkmodus
+  const groupsToRender = editMode ? [...GROUPS, ...HIDDEN_GROUPS] : GROUPS;
+
   const free = [];
-  for(const g of GROUPS){
+  for(const g of groupsToRender){
     for(const n of expandRanges(g.ranges)){
       const r = rows.get(keyOf(g.zone, n));
       const occupied = r && r.status;
@@ -2756,10 +2982,7 @@ function renderFreeTables(){
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'free-tile';
-    el.innerHTML = `
-      <span class="tnum">${t.num}</span>
-      <span class="cap-inline">${t.cap ? `(${t.cap})` : ''}</span>
-    `;
+    el.innerHTML = `<span class="tnum">${t.num}</span>`;
     if(editMode){
       initTouchDrag(el, t.num);
     }
@@ -3315,7 +3538,7 @@ overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ overlay.classLi
 
 /* Reset */
 async function fullResetAll(){
-  for(const g of GROUPS){
+  for(const g of [...GROUPS, ...HIDDEN_GROUPS]){
     for(const n of expandRanges(g.ranges)){
       const r = rows.get(keyOf(g.zone,n));
       if(!r) continue;
