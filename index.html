@@ -740,7 +740,7 @@
   }
   .bouwlijst-list{
     columns:2;
-    column-gap:18mm;
+    column-gap:10mm;
     column-fill:auto;
   }
   .bouwlijst-row{
@@ -2723,6 +2723,12 @@ function renderBouwlijst(){
     bouwlijstTotalsEl.textContent = '';
     return;
   }
+
+  // Aantal kolommen adaptief bepalen zodat alles op 1 A4 past.
+  // Ruwe vuistregel: ~32 regels per kolom op A4 bij standaard font.
+  const rowsPerCol = 32;
+  const cols = Math.min(5, Math.max(1, Math.ceil(entries.length / rowsPerCol)));
+  bouwlijstListEl.style.columnCount = cols;
 
   for(const e of entries){
     const row = document.createElement('div');
