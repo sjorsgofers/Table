@@ -739,10 +739,9 @@
     border-color:#111;
   }
   .bouwlijst-list{
-    display:grid;
-    grid-template-columns:1fr 1fr;
+    columns:2;
     column-gap:18mm;
-    row-gap:2pt;
+    column-fill:auto;
   }
   .bouwlijst-row{
     display:flex;
@@ -751,6 +750,9 @@
     padding:5pt 2pt;
     border-bottom:1px dotted #bbb;
     font-variant-numeric:tabular-nums;
+    break-inside:avoid;
+    -webkit-column-break-inside:avoid;
+    page-break-inside:avoid;
   }
   .bouwlijst-row .tnum{
     font-weight:900;
@@ -767,7 +769,7 @@
     color:#666;
     font-style:italic;
     text-align:center;
-    grid-column:1 / -1;
+    column-span:all;
   }
   .bouwlijst-footer{
     margin-top:10pt;
